@@ -1,6 +1,6 @@
 var maxSize := 20;
 
-class Socket 
+class Socket
 {
   var keySize : int;
   var privateKey : string;
@@ -17,7 +17,7 @@ class Socket
     alpnProtos := new string[maxSize];
     cipherSuites := new string[maxSize];
   }
-  
+
   method isSecure()
   {
   }
