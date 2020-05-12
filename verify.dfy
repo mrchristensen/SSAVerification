@@ -1,4 +1,5 @@
-class Socket 
+
+class Socket
 {
   var maxSize : int;
 
@@ -21,8 +22,9 @@ class Socket
     alpnProtos := new string[maxSize];
     cipherSuites := new string[maxSize];
   }
-  
-  predicate isSecure()
+
+
+  method isSecure()
   {
     true
   }
