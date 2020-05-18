@@ -1,8 +1,6 @@
-
+include "Constraints.dfy"
 class Socket
 {
-  var maxSize : int;
-
   var keySize : int;
   var privateKey : string;
   var remHostname : string;
@@ -14,7 +12,7 @@ class Socket
   ensures fresh(alpnProtos);
   ensures fresh(cipherSuites);
   {
-    maxSize := 20;
+    
 
     keySize := kSize;
     privateKey := pKey;
@@ -24,17 +22,20 @@ class Socket
   }
 
 
-  method isSecure()
+  predicate Secure()
+  reads this;
   {
-    true
+    1 == 1
   }
 }
 
 method main()
 {
   var sock := new Socket;
+  sock.Init(256, "privateKey", "hostname");
   //initialize socket
-  assert sock.isSecure();
+  assert sock.Secure();
 }
+
 
 
