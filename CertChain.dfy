@@ -16,12 +16,13 @@ module CertChain {
       }
       cur_opts := tls_opts;
       if cur_opts.tls_ctx == null {
-        // verify that filepath exists and has valid cert chain
-        // take filepath and load it into the SSL_CTX
+        // verify that filepath exists and has valid cert chain 
+        // take filepath and load it into the SSL_CTX --> return 1, else 0 on error
       }
-
       else {
-
+        while cur_opts.next != null {
+          cur_opts := cur_opts.next;
+        }
       }
 
     }
