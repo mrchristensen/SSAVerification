@@ -1,14 +1,17 @@
 include "Helpers/Constants.dfy"
+include "Helpers/Structs.dfy"
 
 module verify {
   import opened Constants
-    class Socket
+  import opened Structs
+
+  class Socket
   {
     var keySize : int;
     var privateKey : string;
     var remHostname : string;
     var alpnProtos : array<string>;
-    var cipherSuites : array<string>; // FIXME - should be array of type SSL_CIPHER
+    var cipherSuites : array<SSL_CIPHER?>;
 
     method Init(kSize : int, pKey : string, rHostname : string)
       modifies this
@@ -22,7 +25,7 @@ module verify {
       privateKey := pKey;
       remHostname := rHostname;
       alpnProtos := new string[maxSize];
-      cipherSuites := new string[maxSize];
+      cipherSuites := new SSL_CIPHER?[maxSize];
     }
 
 

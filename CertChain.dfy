@@ -1,7 +1,9 @@
 include "Helpers/Structs.dfy"
+include "tls_wrapper.dfy"
 
 module CertChain {
   import opened Structs
+  import opened tls_wrapper
 
   method set_certificate_chain(tls_opts : tls_opts, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
     requires tls_opts != null

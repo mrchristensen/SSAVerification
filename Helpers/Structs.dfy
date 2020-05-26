@@ -11,7 +11,7 @@ module Structs {
 
         method Init()
             modifies this
-            // verify that all fields have been
+            // ensure that all fields have been set
         {
             // FIXME - change this later
             x509 := "";
@@ -20,22 +20,28 @@ module Structs {
     }
 
     class tls_opts {
-        var tls_ctx : int; // FIXME - change this later
-        // var tls_ctx : SSL_CTX; // come back - not sure how to fix this
+        var tls_ctx : SSL_CTX?;
+        var next : tls_opts?;
         // char *app_path
         // int custom_validation
         // int is_server
         // char alpn_string[ALPN_STRING_MAXLEN]
         // struct tls_opts* next
-        var next : tls_opts;
-
-        method Init() {
-            // tls_ctx := new SSL_CTX;
-            // tls_ctx.Init();
+        
+        method Init() 
+            modifies this
+            // ensure that all fields have been set
+        {
+            tls_ctx := new SSL_CTX;
+            tls_ctx.Init();
         }
     }
 
     class tls_conn_ctx {
 
+    }
+
+    class SSL_CIPHER {
+        
     }
 }
