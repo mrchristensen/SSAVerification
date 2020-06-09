@@ -30,7 +30,7 @@ module verify {
 
 
     predicate Secure()
-    reads this;
+      reads this
     {
       1 == 1
     }

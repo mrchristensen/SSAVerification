@@ -4,24 +4,35 @@ module Structs {
     import opened Constants
 
     class SSL_CTX {
-        // cert chain
-        // x509
         var cert_chain : array<string>;
         var x509 : string;
+        var reference_count : int;
 
         method Init()
             modifies this
             // ensure that all fields have been set
         {
-            // FIXME - change this later
+            // FIXME - change these later
             x509 := "";
             cert_chain := new string[maxSize];
+
+            // this is what SSl_CTX_new sets when it is called, resources are freed when this is 0
+            reference_count := 1; 
+        }
+
+        predicate Valid()
+            reads this
+        {
+            reference_count != 0
+            // FIXME - this predicate is unfinished
         }
     }
 
     class tls_opts {
         var tls_ctx : SSL_CTX?;
         var next : tls_opts?;
+
+        // FIXME - not sure if we need the following fields yet
         // char *app_path
         // int custom_validation
         // int is_server
@@ -42,6 +53,6 @@ module Structs {
     }
 
     class SSL_CIPHER {
-        
+
     }
 }
