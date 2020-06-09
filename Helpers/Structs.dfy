@@ -38,8 +38,8 @@ module Structs {
         // int is_server
         // char alpn_string[ALPN_STRING_MAXLEN]
         // struct tls_opts* next
-        
-        method Init() 
+
+        method Init()
             modifies this
             // ensure that all fields have been set
         {
