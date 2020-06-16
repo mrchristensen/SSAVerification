@@ -1,9 +1,11 @@
 include "Helpers/Structs.dfy"
+include "Helpers/Constants.dfy"
 include "config.dfy"
 
 
 module tls_wrapper {
     import opened Structs
+    import opened Constants
     // import opened config
 
     method tls_opts_create(path : string)
@@ -29,13 +31,13 @@ module tls_wrapper {
 
         //If a connection already exists, set the certs on the existing connection
         if conn_ctx != null {
-          if(OPENSSL_VERSION_NUMBER >= 0x10100000L){
-            if(SSL_use_certificate_chain_file(conn_ctx->tls, filepath) != 1) {
+          if(OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_NUMBER_0x10100000L){
+            if(SSL_use_certificate_chain_file(conn_ctx.tls, filepath) != 1) {
               return 0; //Get ready for renegotiation
             }
           }
           else {
-            if(compat_SSL_use_certificate_chain_file(conn_ctx->tls, filepath) != 1) {
+            if(compat_SSL_use_certificate_chain_file(conn_ctx.tls, filepath) != 1) {
               return 0;
             }
           }
@@ -50,16 +52,16 @@ module tls_wrapper {
 
         cur_opts := tls_opts;
         // There is no cert set yet on the first SSL_CTX so we'll use that
-        if (SSL_CTX_get0_certificate(cur_opts->tls_ctx) == NULL) {
-        	if (SSL_CTX_use_certificate_chain_file(cur_opts->tls_ctx, filepath) != 1) {
+        if (SSL_CTX_get0_certificate(cur_opts.tls_ctx) == NULL) {
+        	if (SSL_CTX_use_certificate_chain_file(cur_opts.tls_ctx, filepath) != 1) {
         		return 0; //Error: Unable to assign certificate chain
         	}
         	return 1; //Log: Using cert located at "filepath"
         }
 
         // Otherwise create a new options struct and use that
-        while (cur_opts->next != NULL) {
-        	cur_opts = cur_opts->next;
+        while (cur_opts.next != NULL) {
+        	cur_opts = cur_opts.next;
         }
 
         new_opts = tls_opts_create(NULL);
@@ -67,11 +69,11 @@ module tls_wrapper {
         	return 0;
         }
 
-        if (SSL_CTX_use_certificate_chain_file(new_opts->tls_ctx, filepath) != 1) {
+        if (SSL_CTX_use_certificate_chain_file(new_opts.tls_ctx, filepath) != 1) {
         	return 0; //Error: Unable to assign certificate chain
         }
         // Add new opts to option list
-        cur_opts->next = new_opts;
+        cur_opts.next = new_opts;
         return 1; //Log: Using cert located at "filepath"
       }
 
