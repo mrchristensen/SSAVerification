@@ -17,5 +17,4 @@ module tls_wrapper {
             //if statements with SSL_CTX_set_min_proto_version(tls_ctx, ssa_config->min_version)
         }
     }
-
 }
