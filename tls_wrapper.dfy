@@ -1,9 +1,11 @@
 include "Helpers/Structs.dfy"
+include "Helpers/Constants.dfy"
 include "config.dfy"
 
 
 module tls_wrapper {
     import opened Structs
+    import opened Constants
     // import opened config
 
     method tls_opts_create(path : string)
