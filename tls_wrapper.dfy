@@ -1,10 +1,10 @@
 include "Helpers/Structs.dfy"
-include "config.dfy"
+include "Helpers/config.dfy"
 
 
 module tls_wrapper {
     import opened Structs
-    // import opened config
+    import opened config
 
     method tls_opts_create(path : string)
     {
@@ -13,14 +13,14 @@ module tls_wrapper {
 
         ssa_config := get_app_config(path);
 
-        if(ssa_config){
+        if(ssa_config != null) {
             //if statements with SSL_CTX_set_min_proto_version(tls_ctx, ssa_config->min_version)
         }
     }
 
     method set_certificate_chain(tls_opts : tls_opts, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
         requires tls_opts != null
-        requires filepath != null
+        // requires filepath != null
         // ensures that there is a valid cetificate chain set afterward
         ensures y != 0
       {

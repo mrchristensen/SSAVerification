@@ -86,4 +86,8 @@ module Structs {
     class SSL_CIPHER {
 
     }
+
+    class ssa_config_t {
+      
+    }
 }
