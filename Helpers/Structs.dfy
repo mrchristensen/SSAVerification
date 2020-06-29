@@ -36,7 +36,7 @@ module Structs {
 
     class SSL_CTX {
         var cert_chain : array<string>;
-        var x509 : string;
+        var X509 : string;
         var reference_count : int;
 
         method Init()
@@ -44,7 +44,7 @@ module Structs {
             // ensure that all fields have been set
         {
             // FIXME - change these later
-            x509 := "";
+            X509 := "";
             cert_chain := new string[maxSize];
 
             // this is what SSl_CTX_new sets when it is called, resources are freed when this is 0
@@ -80,7 +80,7 @@ module Structs {
     }
 
     class tls_conn_ctx {
-
+      var tls : string; // string holding the filepath to cert chain file
     }
 
     class SSL_CIPHER {

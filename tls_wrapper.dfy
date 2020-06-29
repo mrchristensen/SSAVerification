@@ -1,10 +1,15 @@
 include "Helpers/Structs.dfy"
-include "Helpers/config.dfy"
-
+include "Helpers/Config.dfy"
+include "Helpers/Constants.dfy"
+include "Helpers/openssl_compat.dfy"
+include "Helpers/OpenSSLHelpers.dfy"
 
 module tls_wrapper {
     import opened Structs
-    import opened config
+    import opened Config
+    import opened Constants
+    import opened openssl_compat
+    import opened OpenSSLHelpers
 
     method tls_opts_create(path : string)
     {
@@ -27,30 +32,35 @@ module tls_wrapper {
         var cur_opts := new tls_opts;
         var new_opts := new tls_opts;
 
-        //If a connection already exists, set the certs on the existing connection
+        // if a connection already exists, set the certs on the existing connection
         if conn_ctx != null {
-          if(OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_NUMBER_0x10100000L){
-            if(SSL_use_certificate_chain_file(conn_ctx.tls, filepath) != 1) {
-              return 0; //Get ready for renegotiation
-            }
+          // FIXME - for now, OPENSSL_VERSION_NUMBER == 0x10100000, 
+          // but we need to test on other version numbers as well
+          if(OPENSSL_VERSION_NUMBER >= 0x10100000) {
+            // SSL_use_certificate_chain_file here loads 
+            // contents of filepath into conn_ctx.tls
+            conn_ctx.tls := filepath;
+            assert conn_ctx.tls != null; // FIXME
           }
           else {
-            if(compat_SSL_use_certificate_chain_file(conn_ctx.tls, filepath) != 1) {
-              return 0;
+            // compat_SSL_use_certificate_chain_file here 
+            // calls this openssl_compat method
+            if (use_certificate_chain_file(null, conn_ctx.tls, filepath) != 1) {
+              y := 0;
+              return;
             }
           }
-
           return 1;
         }
 
-        //If no connection exists, set the certs on the options
+        // if no connection exists, set the certs on the options
         if tls_opts == null {
           return 0;
         }
 
         cur_opts := tls_opts;
         // There is no cert set yet on the first SSL_CTX so we'll use that
-        if (SSL_CTX_get0_certificate(cur_opts.tls_ctx) == NULL) {
+        if (SSL_CTX_get0_certificate(cur_opts.tls_ctx) == "") { // called from OpenSSLHelpers
         	if (SSL_CTX_use_certificate_chain_file(cur_opts.tls_ctx, filepath) != 1) {
         		return 0; //Error: Unable to assign certificate chain
         	}
