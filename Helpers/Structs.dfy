@@ -38,9 +38,15 @@ module Structs {
         var cert_chain : array<string>;
         var X509 : string;
         var reference_count : int;
+        var meth : string; // method
+        var min_proto_version : int;
+        var max_proto_version : int;
+        var mode : int; //should be unsigned but idk if that matters
+        var session_cache_mode : string;
+        var session_cache_size : int;
 
         method Init()
-            modifies this
+            // modifies this
             // ensure that all fields have been set
         {
             // FIXME - change these later

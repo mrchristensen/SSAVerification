@@ -15,6 +15,7 @@ module tls_wrapper {
     {
         var ssa_config : ssa_config_t;
         var opts;
+        var tls_ctx : SSL_CTX;
 
         ssa_config := get_app_config(path);
 
