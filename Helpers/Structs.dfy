@@ -40,20 +40,20 @@ module Structs {
         var meth : string; // method
 
         method Init()
-            // modifies this
-            // ensure that all fields have been set
+          // modifies this
+          // ensure that all fields have been set
         {
-            cert_store := new X509?[maxSize];
+          cert_store := new X509?[maxSize];
 
-            //resources are freed when this is 0
-            references := 1;
+          //resources are freed when this is 0
+          references := 1;
         }
 
         predicate Valid()
             reads this
         {
-            references != 0
-            // FIXME - this predicate is unfinished
+          references != 0
+          // FIXME - this predicate is unfinished
         }
     }
 
@@ -69,11 +69,11 @@ module Structs {
         // char alpn_string[ALPN_STRING_MAXLEN]
 
         method Init()
-            modifies this
-            // ensure that all fields have been set
+          modifies this
+          // ensure that all fields have been set
         {
-            tls_ctx := new SSL_CTX;
-            tls_ctx.Init();
+          tls_ctx := new SSL_CTX;
+          tls_ctx.Init();
         }
     }
 
