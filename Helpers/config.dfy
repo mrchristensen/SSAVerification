@@ -12,7 +12,7 @@ module config {
     // if global config is null, return null
 
     //else
-    config := str_hashmap_get();
+    // config := str_hashmap_get();
 
     
 
