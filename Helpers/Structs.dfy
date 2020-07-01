@@ -40,8 +40,10 @@ module Structs {
         var meth : string; // method
 
         method Init()
-          // modifies this
+          modifies this
           // ensure that all fields have been set
+          ensures fresh(cert_store)
+          ensures references == 1
         {
           cert_store := new X509?[maxSize];
 
@@ -58,6 +60,10 @@ module Structs {
     }
 
     class X509 {
+
+    }
+
+    class X509_STORE_CTX {
 
     }
 

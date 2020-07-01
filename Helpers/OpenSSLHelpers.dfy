@@ -12,11 +12,15 @@ module OpenSSLHelpers {
     return ctx.X509;
   }
 
-  method SSL_CTX_new(meth : string) returns (ctx : SSL_CTX) 
+  method SSL_CTX_new(meth : string) returns (ret : SSL_CTX)
+    requires meth != ""
+    ensures ret != null
+    ensures fresh(ret.cert_store)
+    ensures ret.references == 1
   {
-    var ret : SSL_CTX;
     ret.Init();
-    // assert statements here
+    assert fresh(ret.cert_store);
+    assert ret.references == 1;
 
     ret.meth := meth;
   }

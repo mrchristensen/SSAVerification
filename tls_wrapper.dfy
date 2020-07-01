@@ -26,9 +26,12 @@ module tls_wrapper {
 
     method set_certificate_chain(tls_opts_seq : tls_opts_seq, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
         requires tls_opts_seq != null
-        // requires filepath != null
-        // ensures that there is a valid cetificate chain set afterward
+        requires filepath != null
+        requires tls_opts_seq.opts_list != null
         ensures y != 0
+        ensures tls_opts_seq.opts_list != null
+        ensures tls_opts_seq != null
+        // ensure the length of tls_opts_seq.opts_list either increases or stays the same
       {
         var cur_opts := new tls_opts_seq;
         var new_opts := new tls_opts;
@@ -59,7 +62,6 @@ module tls_wrapper {
           return 0;
         }
 
-
         cur_opts := tls_opts_seq.opts_list[0];
         // There is no cert set yet on the first SSL_CTX so we'll use that
         if (SSL_CTX_get0_certificate(cur_opts.tls_ctx) == "") { // called from OpenSSLHelpers
@@ -72,9 +74,8 @@ module tls_wrapper {
         cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
 
         new_opts := tls_opts_create(NULL);
-        if (new_opts == NULL) {
-        	return 0;
-        }
+        assert new_opts != null;
+        assert new_opts.tls_ctx != null;
 
         if (SSL_CTX_use_certificate_chain_file(new_opts.tls_ctx, filepath) != 1) {
         	return 0; //Error: Unable to assign certificate chain
@@ -84,4 +85,12 @@ module tls_wrapper {
         return 1; //Log: Using cert located at "filepath"
       }
 
+    // this is called in SSA in every TLS handshake and this callback
+    // should be set in the accept() entry point
+    method client_verify(store : X509_STORE_CTX, arg : array<string>) returns (y : int)
+    {
+      // TODO - create state diagram and model for this function from SSA
+      // then implement it in predicate that determines the
+      // security of the current SSL_CTX object
+    }
 }
