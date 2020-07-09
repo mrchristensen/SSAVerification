@@ -11,17 +11,18 @@ module tls_wrapper {
     import opened openssl_compat
     import opened OpenSSLHelpers
 
+    // TODO - FINISH THIS
     method tls_opts_create(path : string)
     {
-        var ssa_config : ssa_config_t;
-        var opts;
-        var tls_ctx : SSL_CTX;
+      var ssa_config : ssa_config_t;
+      var opts;
+      var tls_ctx : SSL_CTX;
 
-        ssa_config := get_app_config(path);
+      ssa_config := get_app_config(path);
 
-        if(ssa_config != null) {
-            //if statements with SSL_CTX_set_min_proto_version(tls_ctx, ssa_config->min_version)
-        }
+      if(ssa_config != null) {
+        //if statements with SSL_CTX_set_min_proto_version(tls_ctx, ssa_config->min_version)
+      }
     }
 
     method set_certificate_chain(tls_opts_seq : tls_opts_seq, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
@@ -31,6 +32,7 @@ module tls_wrapper {
         ensures y != 0
         ensures tls_opts_seq.opts_list != null
         ensures tls_opts_seq != null
+        ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
         // ensure the length of tls_opts_seq.opts_list either increases or stays the same
       {
         var cur_opts := new tls_opts_seq;

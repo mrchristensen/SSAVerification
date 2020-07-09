@@ -38,6 +38,7 @@ module Structs {
         var cert_store : array<X509?>;
         var references : int;
         var meth : string; // method
+        var X509_cert : X509?;
 
         method Init()
           modifies this
