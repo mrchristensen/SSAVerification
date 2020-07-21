@@ -35,10 +35,16 @@ module Structs {
   }
 
     class SSL_CTX {
+        //array of certificates in X509 form
         var cert_store : array<X509?>;
         var references : int;
         var meth : string; // method
         var X509_cert : X509?;
+
+        // the session_id_context is used to ensure sessions are only reused in
+        // the appropriate context
+        var sid_ctx_length : int;
+        var sid_ctx : string;
 
         method Init()
           modifies this

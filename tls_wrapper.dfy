@@ -12,11 +12,26 @@ module tls_wrapper {
     import opened OpenSSLHelpers
 
     // TODO - FINISH THIS
-    method tls_opts_create(path : string)
+    method tls_opts_create(path : string) returns (opts : tls_opts?)
+      requires path != ""
+      ensures opts.tls_ctx.meth == "SSLv23_method"
+      ensures opts.tls_ctx.references == 1
+      ensures fresh(opts.tls_ctx.cert_store)
     {
       var ssa_config : ssa_config_t;
-      var opts;
       var tls_ctx : SSL_CTX;
+
+      opts := new tls_opts;
+
+      // initialized with SSL_CTX_new
+      tls_ctx.Init();
+      tls_ctx.meth := "SSLv23_method";
+      assert fresh(tls_ctx.cert_store);
+      assert tls_ctx.references == 1;
+
+      // state changes from SSL_CTX_set_session_id_context
+      tls_ctx.sid_ctx_length := 1;
+      tls_ctx.sid_ctx := 1; 
 
       ssa_config := get_app_config(path);
 
@@ -33,7 +48,6 @@ module tls_wrapper {
         ensures tls_opts_seq.opts_list != null
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
-        // ensure the length of tls_opts_seq.opts_list either increases or stays the same
       {
         var cur_opts := new tls_opts_seq;
         var new_opts := new tls_opts;
@@ -89,10 +103,15 @@ module tls_wrapper {
 
     // this is called in SSA in every TLS handshake and this callback
     // should be set in the accept() entry point
-    method client_verify(store : X509_STORE_CTX, arg : array<string>) returns (y : int)
+    method client_verify(store : X509_STORE_CTX?) returns (y : int)
+      requires store != null
+      ensures y == 1
     {
-      // TODO - create state diagram and model for this function from SSA
-      // then implement it in predicate that determines the
-      // security of the current SSL_CTX object
+      // just verify that this function is called, might come back
+      // and further model this
+      if(X509_verify_cert()) {
+        return 1;
+      }
+      return 0;
     }
 }
