@@ -31,7 +31,7 @@ module tls_wrapper {
 
       // state changes from SSL_CTX_set_session_id_context
       tls_ctx.sid_ctx_length := 1;
-      tls_ctx.sid_ctx := 1; 
+      tls_ctx.sid_ctx := 1;
 
       ssa_config := get_app_config(path);
 
@@ -54,16 +54,16 @@ module tls_wrapper {
 
         // if a connection already exists, set the certs on the existing connection
         if conn_ctx != null {
-          // FIXME - for now, OPENSSL_VERSION_NUMBER == 0x10100000, 
+          // FIXME - for now, OPENSSL_VERSION_NUMBER == 0x10100000,
           // but we need to test on other version numbers as well
           if(OPENSSL_VERSION_NUMBER >= 0x10100000) {
-            // SSL_use_certificate_chain_file here loads 
+            // SSL_use_certificate_chain_file here loads
             // contents of filepath into conn_ctx.tls
             conn_ctx.tls := filepath;
             assert conn_ctx.tls != null;
           }
           else {
-            // compat_SSL_use_certificate_chain_file here 
+            // compat_SSL_use_certificate_chain_file here
             // calls this openssl_compat method
             if (use_certificate_chain_file(null, conn_ctx.tls, filepath) != 1) {
               y := 0;

@@ -103,6 +103,6 @@ module Structs {
     }
 
     class ssa_config_t {
-      
+
     }
 }
