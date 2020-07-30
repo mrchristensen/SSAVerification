@@ -36,13 +36,13 @@ module OpenSSLHelpers {
   }
 
   // TODO - WRITE THIS
-  // loads a certificate chain from B<file> into B<ctx>. 
+  // loads a certificate chain from B<file> into B<ctx>.
   // The certificates must be in PEM format and must
-  // be sorted starting with the subject's certificate 
-  // (actual client or server certificate), followed by 
+  // be sorted starting with the subject's certificate
+  // (actual client or server certificate), followed by
   // intermediate CA certificates if applicable, and
   // ending at the highest level (root) CA.
-  method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?) 
+  method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?)
   {
     // OpenSSL Code:
     // while ((ca = PEM_read_bio_X509(in, NULL, passwd_callback,

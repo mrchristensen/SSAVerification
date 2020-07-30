@@ -37,7 +37,7 @@ module tls_wrapper {
       assert ssa_config != null;
 
       // sets things on tls_ctx
-      tls_ctx.cipher_list_set = true;
+      tls_ctx.cipher_list_set = true; // ensure SSL_CTX_set_cipher_list is calleds
 
       opts->tls_ctx = tls_ctx;
       opts->path = path;
