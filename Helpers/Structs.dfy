@@ -45,17 +45,20 @@ module Structs {
         // the appropriate context
         var sid_ctx_length : int;
         var sid_ctx : string;
+        var cipher_list_set : bool;
 
         method Init()
           modifies this
           // ensure that all fields have been set
           ensures fresh(cert_store)
           ensures references == 1
+          ensures cipher_list_set = false
         {
           cert_store := new X509?[maxSize];
 
           //resources are freed when this is 0
           references := 1;
+          cipher_list_set = false;
         }
 
         predicate Valid()
@@ -76,17 +79,19 @@ module Structs {
 
     class tls_opts {
         var tls_ctx : SSL_CTX?;
-        // char *app_path
+        var app_path : string;
         // int custom_validation
         // int is_server
         // char alpn_string[ALPN_STRING_MAXLEN]
 
         method Init()
           modifies this
-          // ensure that all fields have been set
+          ensures tls_ctx != null
+          ensures app_path != null
         {
           tls_ctx := new SSL_CTX;
           tls_ctx.Init();
+          app_path = "";
         }
     }
 

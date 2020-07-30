@@ -1,22 +1,22 @@
 include "Helpers/Structs.dfy"
 include "Helpers/Config.dfy"
 include "Helpers/Constants.dfy"
-include "Helpers/openssl_compat.dfy"
 include "Helpers/OpenSSLHelpers.dfy"
 
 module tls_wrapper {
     import opened Structs
     import opened Config
     import opened Constants
-    import opened openssl_compat
     import opened OpenSSLHelpers
 
-    // TODO - FINISH THIS
     method tls_opts_create(path : string) returns (opts : tls_opts?)
       requires path != ""
       ensures opts.tls_ctx.meth == "SSLv23_method"
       ensures opts.tls_ctx.references == 1
       ensures fresh(opts.tls_ctx.cert_store)
+      ensures opts.tls_ctx.sid_ctx_length == 1
+      ensures opts.tls_ctx.cipher_list_set = true
+      ensures opts.tls_ctx.app_path = path
     {
       var ssa_config : ssa_config_t;
       var tls_ctx : SSL_CTX;
@@ -34,10 +34,14 @@ module tls_wrapper {
       tls_ctx.sid_ctx := 1; 
 
       ssa_config := get_app_config(path);
+      assert ssa_config != null;
 
-      if(ssa_config != null) {
-        //if statements with SSL_CTX_set_min_proto_version(tls_ctx, ssa_config->min_version)
-      }
+      // sets things on tls_ctx
+      tls_ctx.cipher_list_set = true;
+
+      opts->tls_ctx = tls_ctx;
+      opts->path = path;
+      return opts;
     }
 
     method set_certificate_chain(tls_opts_seq : tls_opts_seq, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
@@ -54,22 +58,11 @@ module tls_wrapper {
 
         // if a connection already exists, set the certs on the existing connection
         if conn_ctx != null {
-          // FIXME - for now, OPENSSL_VERSION_NUMBER == 0x10100000, 
-          // but we need to test on other version numbers as well
-          if(OPENSSL_VERSION_NUMBER >= 0x10100000) {
-            // SSL_use_certificate_chain_file here loads 
-            // contents of filepath into conn_ctx.tls
-            conn_ctx.tls := filepath;
-            assert conn_ctx.tls != null;
-          }
-          else {
-            // compat_SSL_use_certificate_chain_file here 
-            // calls this openssl_compat method
-            if (use_certificate_chain_file(null, conn_ctx.tls, filepath) != 1) {
-              y := 0;
-              return;
-            }
-          }
+          // SSL_use_certificate_chain_file here loads 
+          // contents of filepath into conn_ctx.tls
+          conn_ctx.tls := filepath;
+          assert conn_ctx.tls != null;
+          assert conn_ctx.tls != "";
           return 1;
         }
 

@@ -1,6 +1,6 @@
 include "Structs.dfy"
 
-module config {
+module Config {
   import opened Structs
 
   // TODO - FINISH THIS
