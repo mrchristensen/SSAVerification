@@ -1,20 +1,18 @@
 include "Structs.dfy"
 include "Constants.dfy"
+include "HelperFunctions.dfy"
 
 module OpenSSLHelpers {
   import opened Structs
   import opened Constants
+  import opened HelperFunctions
 
   // return X509 object that corresponds to the ssl_ctx obj given
   method SSL_CTX_get0_certificate(ctx : SSL_CTX?) returns (X509_ret : X509?)
     requires ctx != null
     ensures X509_ret == ctx.X509_cert
-    ensures X509_ret != null // if SSL_CTX_use_certificate was not used
+    ensures X509_ret != null // if SSL_CTX_use_certificate was not used - not secure
   {
-    // if (ctx->cert != NULL)
-    //     return ctx->cert->key->x509;
-    // else
-    //     return NULL;
     return ctx.X509_cert;
   }
 
@@ -35,35 +33,18 @@ module OpenSSLHelpers {
     ret.meth := meth;
   }
 
-  // TODO - WRITE THIS
   // loads a certificate chain from B<file> into B<ctx>.
-  // The certificates must be in PEM format and must
-  // be sorted starting with the subject's certificate
-  // (actual client or server certificate), followed by
-  // intermediate CA certificates if applicable, and
-  // ending at the highest level (root) CA.
   method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?)
+    requires file != ""
+    requires ctx != null
+    ensures ctx.num_certs != old(ctx.num_certs)
   {
-    // OpenSSL Code:
-    // while ((ca = PEM_read_bio_X509(in, NULL, passwd_callback,
-    //                                 passwd_callback_userdata))
-    //         != NULL) {
-    //     if (ctx)
-    //         r = SSL_CTX_add0_chain_cert(ctx, ca);
-    //     else
-    //         r = SSL_add0_chain_cert(ssl, ca);
-    //     /*
-    //       * Note that we must not free ca if it was successfully added to
-    //       * the chain (while we must free the main certificate, since its
-    //       * reference count is increased by SSL_CTX_use_certificate).
-    //       */
-    //     if (!r) {
-    //         X509_free(ca);
-    //         ret = 0;
-    //         goto end;
-    //     }
-    // }
-
+    file_arr := ArrayFromSeq(file);
+    // TODO - parse file so that each set of lines
+    // starting with "-----BEGIN CERTIFICATE-----"
+    // and ending with "-----END CERTIFICATE-----"
+    // is loaded into an X509 object and added
+    // to ctx.cert_store using ctx.addX509(cert : X509?)
   }
 
   // just verify that this has been called

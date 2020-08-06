@@ -24,7 +24,6 @@ module verify {
     y := set_certificate_chain(null, null, null);
     //assert the crap out of it
     // assert(y == 1);
-
     
 
     assert sock.Secure();

@@ -17,9 +17,11 @@ module tls_wrapper {
       ensures opts.tls_ctx.sid_ctx_length == 1
       ensures opts.tls_ctx.cipher_list_set = true
       ensures opts.tls_ctx.app_path = path
+      ensures opts.tls_ctx.CA_locations_set = true
     {
       var ssa_config : ssa_config_t;
       var tls_ctx : SSL_CTX;
+      var store_file : string; // trust store
 
       opts := new tls_opts;
 
@@ -33,11 +35,19 @@ module tls_wrapper {
       tls_ctx.sid_ctx_length := 1;
       tls_ctx.sid_ctx := 1; 
 
-      ssa_config := get_app_config(path);
+      ssa_config := get_app_config(path); // must set trust_store or error
       assert ssa_config != null;
+      assert ssa_config.trust_store != "";
 
       // sets things on tls_ctx
-      tls_ctx.cipher_list_set = true; // ensure SSL_CTX_set_cipher_list is calleds
+      tls_ctx.cipher_list_set = true; // ensure SSL_CTX_set_cipher_list is called
+      store_file = ssa_config.trust_store;
+
+      // SSL_CTX_load_verify_locations - set default locations for trusted CA certificates
+      // FIXME - should this do something with store_file?
+      tls_ctx.CA_locations_set = true;
+
+      // FIXME - ensure that ssa_config.randseed_path is set
 
       opts->tls_ctx = tls_ctx;
       opts->path = path;

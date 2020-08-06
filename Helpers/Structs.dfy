@@ -35,30 +35,37 @@ module Structs {
   }
 
     class SSL_CTX {
-        //array of certificates in X509 form
-        var cert_store : array<X509?>;
+        var cert_store : array<X509?>; // FIXME - might be better to make this seq
+        var num_certs : int;
         var references : int;
         var meth : string; // method
         var X509_cert : X509?;
-
-        // the session_id_context is used to ensure sessions are only reused in
-        // the appropriate context
         var sid_ctx_length : int;
-        var sid_ctx : string;
+        var sid_ctx : string; // session id ctx - ensure sessions are only resused in correct context
         var cipher_list_set : bool;
 
         method Init()
           modifies this
-          // ensure that all fields have been set
           ensures fresh(cert_store)
           ensures references == 1
           ensures cipher_list_set = false
         {
           cert_store := new X509?[maxSize];
+          num_certs := 0;
 
           //resources are freed when this is 0
           references := 1;
           cipher_list_set = false;
+        }
+
+        method addX509(cert : X509?)
+          modifies this
+          requires cert != null
+          ensures cert_store[old(num_certs)] := cert
+          // ensures cert_store contains cert
+        {
+          cert_store[num_certs] := cert;
+          num_certs := num_certs + 1;
         }
 
         predicate Valid()
@@ -70,7 +77,15 @@ module Structs {
     }
 
     class X509 {
+      var cert : string;
 
+      method Init() 
+        modifies this
+        ensures cert != null
+        ensures cert == ""
+      {
+        cert := "";
+      }
     }
 
     class X509_STORE_CTX {
@@ -100,7 +115,7 @@ module Structs {
     }
 
     class tls_conn_ctx {
-      var tls : string; // string holding the filepath to cert chain file
+      var tls : string; // filepath to cert chain file
     }
 
     class SSL_CIPHER {
@@ -108,6 +123,7 @@ module Structs {
     }
 
     class ssa_config_t {
+      var trust_store : string;
 
     }
 }
