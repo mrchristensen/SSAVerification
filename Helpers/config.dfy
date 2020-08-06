@@ -2,7 +2,7 @@ include "Structs.dfy"
 
 module Config {
   import opened Structs
-  
+
   // Note - we're assuming that this function is being called
   // only once parse_config has been called in SSA, which would
   // have set up the global_config with str_hashmap_create(20)

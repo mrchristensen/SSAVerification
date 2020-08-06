@@ -48,14 +48,14 @@ module Structs {
           modifies this
           ensures fresh(cert_store)
           ensures references == 1
-          ensures cipher_list_set = false
+          ensures cipher_list_set == false
         {
           cert_store := new X509?[maxSize];
           num_certs := 0;
 
           //resources are freed when this is 0
           references := 1;
-          cipher_list_set = false;
+          cipher_list_set := false;
         }
 
         method addX509(cert : X509?)
@@ -79,7 +79,7 @@ module Structs {
     class X509 {
       var cert : string;
 
-      method Init() 
+      method Init()
         modifies this
         ensures cert != null
         ensures cert == ""
