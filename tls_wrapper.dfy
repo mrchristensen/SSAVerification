@@ -49,8 +49,8 @@ module tls_wrapper {
 
       // FIXME - ensure that ssa_config.randseed_path is set
 
-      opts->tls_ctx := tls_ctx;
-      opts->path := path;
+      opts.tls_ctx := tls_ctx; //I change the -> to .
+      opts.path := path;
       return opts;
     }
 

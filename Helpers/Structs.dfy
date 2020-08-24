@@ -60,8 +60,10 @@ module Structs {
 
         method addX509(cert : X509?)
           modifies this
+          modifies cert_store
           requires cert != null
-          ensures cert_store[old(num_certs)] := cert
+          // requires num_certs < maxSize
+          ensures cert_store[old(num_certs)] == cert //Todo fix this error: Index out of range
           // ensures cert_store contains cert
         {
           cert_store[num_certs] := cert;
@@ -81,7 +83,7 @@ module Structs {
 
       method Init()
         modifies this
-        ensures cert != null
+        // ensures cert != null //TODO: find the null equivalant for Strings
         ensures cert == ""
       {
         cert := "";
@@ -102,11 +104,12 @@ module Structs {
         method Init()
           modifies this
           ensures tls_ctx != null
-          ensures app_path != null
+          // ensures app_path != null //TODO: find the null equivalant for Strings
+          ensures app_path == ""
         {
           tls_ctx := new SSL_CTX;
           tls_ctx.Init();
-          app_path = "";
+          app_path := "";
         }
     }
 
