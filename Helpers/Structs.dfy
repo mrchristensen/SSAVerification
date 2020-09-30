@@ -1,6 +1,6 @@
 include "Constants.dfy"
 
-module Structs 
+module Structs
 {
   import opened Constants
 
@@ -35,7 +35,7 @@ module Structs
     }
   }
 
-  class SSL_CTX 
+  class SSL_CTX
   {
     var cert_store : array<X509?>; // FIXME - might be better to make this seq
     var num_certs : int;
@@ -50,20 +50,24 @@ module Structs
       modifies this
       ensures fresh(cert_store)
       ensures references == 1
-      ensures cipher_list_set = false
+      ensures cipher_list_set == false
+      ensures cert_store.Length == maxSize
     {
       cert_store := new X509?[maxSize];
       num_certs := 0;
 
       //resources are freed when this is 0
       references := 1;
-      cipher_list_set = false;
+      cipher_list_set := false;
     }
 
     method addX509(cert : X509?)
       modifies this
       requires cert != null
-      ensures cert_store[old(num_certs)] := cert
+      requires cert_store.Length >= maxSize
+      requires num_certs < maxSize
+      ensures forall i | 0 <= i < cert_store.Length :: !(0 <= num_certs < maxSize) ==> cert_store[i] == old(cert_store[num_certs]) //TODO: https://stackoverflow.com/questions/49589887/specifying-modification-of-part-of-an-array-in-dafny
+      ensures cert_store[old(num_certs)] == cert
       // ensures cert_store contains cert
     {
       cert_store[num_certs] := cert;
@@ -78,20 +82,19 @@ module Structs
     }
   }
 
-  class X509 
+  class X509
   {
     var cert : string;
 
-    method Init() 
+    method Init()
       modifies this
-      ensures cert != null
-      ensures cert == ""
+      // ensures cert == ""
     {
       cert := "";
     }
   }
 
-  class X509_STORE_CTX 
+  class X509_STORE_CTX
   {
 
   }
@@ -106,11 +109,11 @@ module Structs
     method Init()
       modifies this
       ensures tls_ctx != null
-      ensures app_path != null
+      // ensures app_path != ""
     {
       tls_ctx := new SSL_CTX;
       tls_ctx.Init();
-      app_path = "";
+      app_path := "";
     }
   }
 
@@ -119,16 +122,16 @@ module Structs
     var opts_list : seq<tls_opts?>;
   }
 
-  class tls_conn_ctx 
+  class tls_conn_ctx
   {
     var tls : string; // filepath to cert chain file
   }
 
-  class SSL_CIPHER 
+  class SSL_CIPHER
   {
   }
 
-  class ssa_config_t 
+  class ssa_config_t
   {
     var trust_store : string;
   }

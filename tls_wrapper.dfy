@@ -92,7 +92,7 @@ module tls_wrapper {
 
         cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
 
-        new_opts := tls_opts_create(NULL);
+        new_opts := tls_opts_create(null);
         assert new_opts != null;
         assert new_opts.tls_ctx != null;
 

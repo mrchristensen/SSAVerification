@@ -17,8 +17,5 @@ module Config {
     //else
     // config := str_hashmap_get();
 
-
-
-
   }
 }

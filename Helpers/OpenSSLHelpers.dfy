@@ -35,7 +35,7 @@ module OpenSSLHelpers {
   }
 
   // loads a certificate chain from B<file> into B<ctx>.
-  method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?)
+  method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?) //TODO: this need to return an int
     requires file != ""
     requires ctx != null
     // ensures ctx.num_certs != old(ctx.num_certs)
