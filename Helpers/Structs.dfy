@@ -6,8 +6,8 @@ module Structs
 
   class Socket
   {
-    var keySize : int;
     var privateKey : string;
+    var publicKey : string;
     var remHostname : string;
     var alpnProtos : array<string>;
     var cipherSuites : array<SSL_CIPHER?>;
@@ -16,20 +16,23 @@ module Structs
       modifies this
       ensures fresh(alpnProtos)
       ensures fresh(cipherSuites)
-      ensures keySize == kSize
       ensures privateKey == pKey
       ensures remHostname == rHostname
     {
-      keySize := kSize;
       privateKey := pKey;
       remHostname := rHostname;
       alpnProtos := new string[maxSize];
       cipherSuites := new SSL_CIPHER?[maxSize];
     }
 
-
     predicate Secure()
       reads this
+      reads this.cipherSuites
+      reads this.alpnProtos
+      requires forall k :: 0 <= k < cipherSuites.Length 
+        ==> cipherSuites[k] != null && cipherSuites[k].secure()
+      requires remHostname != ""
+      requires forall k :: 0 <= k < alpnProtos.Length ==> alpnProtos[k] != ""
     {
       1 == 1
     }
@@ -79,6 +82,7 @@ module Structs
     {
       references != 0
       // FIXME - this predicate is unfinished
+      // check that cert_store is not empty
     }
   }
 
@@ -129,6 +133,25 @@ module Structs
 
   class SSL_CIPHER
   {
+    var valid : int;
+    var name : string;
+    // uint32_t algorithm_mkey;    /* key exchange algorithm */
+    // uint32_t algorithm_auth;    /* server authentication */
+    // uint32_t algorithm_enc;     /* symmetric encryption */
+    // uint32_t algorithm_mac;     /* symmetric authentication */
+    // int min_tls;                /* minimum SSL/TLS protocol version */
+    // int max_tls;                /* maximum SSL/TLS protocol version */
+    // int min_dtls;               /* minimum DTLS protocol version */
+    // int max_dtls;               /* maximum DTLS protocol version */
+    // uint32_t algo_strength;     /* strength and export flags */
+    // uint32_t algorithm2;        /* Extra flags */
+    // int32_t strength_bits;      /* Number of bits really used */
+    // uint32_t alg_bits;          /* Number of bits for algorithm */
+
+    predicate secure() 
+    {
+      1 == 1 // TODO - look into how to verify security of SSL_CIPHER
+    }
   }
 
   class ssa_config_t
