@@ -38,13 +38,13 @@ module OpenSSLHelpers {
   method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?) returns (ret : int)
     requires file != ""
     requires ctx != null
-    // ensures ctx.num_certs != old(ctx.num_certs)
+    ensures ctx.num_certs != old(ctx.num_certs)
   {
     // in C code, it parses object from file but we'll just make an empty one for now
     var x509 := new X509;
     x509.Init();
     ctx.addX509(x509);
-    return 0;
+    ret := 0;
   }
 
   // just verify that this has been called

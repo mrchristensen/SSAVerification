@@ -48,6 +48,8 @@ module Structs
     var sid_ctx_length : int;
     var sid_ctx : string; // session id ctx - ensure sessions are only resused in correct context
     var cipher_list_set : bool;
+    var app_path : string;
+    var CA_locations_set : bool;
 
     method Init()
       modifies this
@@ -66,6 +68,7 @@ module Structs
 
     method addX509(cert : X509?)
       modifies this
+      modifies this.cert_store
       requires cert != null
       requires cert_store.Length >= maxSize
       requires num_certs < maxSize
@@ -79,10 +82,11 @@ module Structs
 
     predicate Valid()
         reads this
+        requires references != 0
+        requires cert_store.Length > 0
+        requires CA_locations_set == true
     {
-      references != 0
-      // FIXME - this predicate is unfinished
-      // check that cert_store is not empty
+      1 == 1
     }
   }
 

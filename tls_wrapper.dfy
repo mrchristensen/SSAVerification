@@ -33,7 +33,7 @@ module tls_wrapper {
 
       // state changes from SSL_CTX_set_session_id_context
       tls_ctx.sid_ctx_length := 1;
-      tls_ctx.sid_ctx := 1;
+      tls_ctx.sid_ctx := "1";
 
       ssa_config := get_app_config(path); // must set trust_store or error
       assert ssa_config != null;
@@ -44,22 +44,21 @@ module tls_wrapper {
       store_file := ssa_config.trust_store;
 
       // SSL_CTX_load_verify_locations - set default locations for trusted CA certificates
-      // FIXME - should this do something with store_file?
       tls_ctx.CA_locations_set := true;
 
-      // FIXME - ensure that ssa_config.randseed_path is set
+      // TODO - ensure that ssa_config.randseed_path is set
 
       opts.tls_ctx := tls_ctx; //I change the -> to .
-      opts.path := path;
+      opts.app_path := path;
       return opts;
     }
 
     method set_certificate_chain(tls_opts_seq : tls_opts_seq, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
         requires tls_opts_seq != null
-        requires filepath != null
-        requires tls_opts_seq.opts_list != null
+        requires filepath != ""
+        requires |tls_opts_seq.opts_list| != 0
         ensures y != 0
-        ensures tls_opts_seq.opts_list != null
+        ensures |tls_opts_seq.opts_list| != 0
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
       {
