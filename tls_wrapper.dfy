@@ -62,7 +62,7 @@ module tls_wrapper {
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
       {
-        var cur_opts := new tls_opts_seq;
+        var cur_opts := new tls_opts;
         var new_opts := new tls_opts;
 
         // if a connection already exists, set the certs on the existing connection
@@ -70,7 +70,7 @@ module tls_wrapper {
           // SSL_use_certificate_chain_file here loads
           // contents of filepath into conn_ctx.tls
           conn_ctx.tls := filepath;
-          assert conn_ctx.tls != null;
+          assert conn_ctx.tls != "";
           assert conn_ctx.tls != "";
           return 1;
         }
@@ -82,8 +82,13 @@ module tls_wrapper {
 
         cur_opts := tls_opts_seq.opts_list[0];
         // There is no cert set yet on the first SSL_CTX so we'll use that
-        if (SSL_CTX_get0_certificate(cur_opts.tls_ctx) == "") { // called from OpenSSLHelpers
-        	if (SSL_CTX_use_certificate_chain_file(cur_opts.tls_ctx, filepath) != 1) {
+        var get_cert:X509?;
+        get_cert := SSL_CTX_get0_certificate(cur_opts.tls_ctx);
+
+        if (get_cert == null) { // called from OpenSSLHelpers
+          var use_chain_file:int;
+          use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, cur_opts.tls_ctx);
+        	if (use_chain_file != 1) {
         		return 0; //Error: Unable to assign certificate chain
         	}
         	return 1; //Log: Using cert located at "filepath"
@@ -91,11 +96,13 @@ module tls_wrapper {
 
         cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
 
-        new_opts := tls_opts_create(null);
+        new_opts := tls_opts_create("");
         assert new_opts != null;
         assert new_opts.tls_ctx != null;
 
-        if (SSL_CTX_use_certificate_chain_file(new_opts.tls_ctx, filepath) != 1) {
+        var use_chain_file:int;
+        use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
+        if (use_chain_file != 1) {
         	return 0; //Error: Unable to assign certificate chain
         }
         // Add new opts to option list
@@ -111,7 +118,9 @@ module tls_wrapper {
     {
       // just verify that this function is called, might come back
       // and further model this
-      if(X509_verify_cert()) {
+      var verified:bool;
+      verified := X509_verify_cert();
+      if(verified) {
         return 1;
       }
       return 0;
