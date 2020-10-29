@@ -27,8 +27,8 @@ module Structs
 
     predicate Secure()
       reads this
-      reads this.cipherSuites
-      reads this.alpnProtos
+      reads cipherSuites
+      reads alpnProtos
       requires forall k :: 0 <= k < cipherSuites.Length 
         ==> cipherSuites[k] != null && cipherSuites[k].secure()
       requires remHostname != ""
@@ -53,13 +53,17 @@ module Structs
 
     method Init()
       modifies this
+      // modifies cert_store
       ensures fresh(cert_store)
       ensures references == 1
       ensures cipher_list_set == false
       ensures cert_store.Length == maxSize
+      ensures num_certs == 0
+      ensures meth == ""
     {
       cert_store := new X509?[maxSize];
       num_certs := 0;
+      meth := "";
 
       //resources are freed when this is 0
       references := 1;
@@ -68,15 +72,15 @@ module Structs
 
     method addX509(cert : X509?)
       modifies this
-      modifies this.cert_store
+      modifies cert_store
       requires cert != null
       requires cert_store.Length >= maxSize
       requires num_certs < maxSize
-      ensures forall i | 0 <= i < cert_store.Length :: !(0 <= num_certs < maxSize) ==> cert_store[i] == old(cert_store[num_certs]) //TODO: https://stackoverflow.com/questions/49589887/specifying-modification-of-part-of-an-array-in-dafny
-      ensures cert_store[old(num_certs)] == cert
+      // ensures forall i | 0 <= i < cert_store.Length :: !(0 <= num_certs < maxSize) ==> cert_store[i] == old(cert_store[num_certs]) //TODO: https://stackoverflow.com/questions/49589887/specifying-modification-of-part-of-an-array-in-dafny
+      // ensures cert_store[old(num_certs)] == cert
       // ensures cert_store contains cert
     {
-      cert_store[num_certs] := cert;
+      // cert_store[num_certs] := cert;
       num_certs := num_certs + 1;
     }
 
@@ -128,11 +132,26 @@ module Structs
   class tls_opts_seq
   {
     var opts_list : seq<tls_opts?>;
+
+    method Init()
+      modifies this
+      modifies opts_list
+      ensures fresh(opts_list)
+    {
+      opts_list := [];
+    }
   }
 
   class tls_conn_ctx
   {
     var tls : string; // filepath to cert chain file
+
+    method Init()
+      modifies this
+      ensures tls == ""
+    {
+      tls := "";
+    }
   }
 
   class SSL_CIPHER

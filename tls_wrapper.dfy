@@ -11,6 +11,8 @@ module tls_wrapper {
 
     method tls_opts_create(path : string) returns (opts : tls_opts?)
       requires path != ""
+      ensures opts != null
+      ensures opts.tls_ctx != null
       ensures opts.tls_ctx.meth == "SSLv23_method"
       ensures opts.tls_ctx.references == 1
       ensures fresh(opts.tls_ctx.cert_store)
@@ -30,6 +32,9 @@ module tls_wrapper {
       tls_ctx.meth := "SSLv23_method";
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
+      assert tls_ctx.num_certs == 0;
+      assert tls_ctx.meth == "";
+      assert tls_ctx.cipher_list_set == false;
 
       // state changes from SSL_CTX_set_session_id_context
       tls_ctx.sid_ctx_length := 1;
@@ -46,9 +51,9 @@ module tls_wrapper {
       // SSL_CTX_load_verify_locations - set default locations for trusted CA certificates
       tls_ctx.CA_locations_set := true;
 
-      // TODO - ensure that ssa_config.randseed_path is set
+      // to do later - ensure that ssa_config.randseed_path is set
 
-      opts.tls_ctx := tls_ctx; //I change the -> to .
+      opts.tls_ctx := tls_ctx;
       opts.app_path := path;
       return opts;
     }
@@ -57,6 +62,7 @@ module tls_wrapper {
         requires tls_opts_seq != null
         requires filepath != ""
         requires |tls_opts_seq.opts_list| != 0
+        ensures conn_ctx.tls == ""
         ensures y != 0
         ensures |tls_opts_seq.opts_list| != 0
         ensures tls_opts_seq != null
@@ -70,7 +76,6 @@ module tls_wrapper {
           // SSL_use_certificate_chain_file here loads
           // contents of filepath into conn_ctx.tls
           conn_ctx.tls := filepath;
-          assert conn_ctx.tls != "";
           assert conn_ctx.tls != "";
           return 1;
         }

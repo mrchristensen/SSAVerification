@@ -14,16 +14,19 @@ module verify {
 
     sock.Init(256, privateKey, hostname);
     // assert all properties
-    assert sock.keySize == 256;
     assert sock.privateKey == "privateKey";
     assert sock.remHostname == hostname;
     assert fresh(sock.alpnProtos);
     assert fresh(sock.cipherSuites);
 
     //call set_cert_chain
-    y := set_certificate_chain(null, null, null);
+    var conn_ctx := new tls_conn_ctx;
+    conn_ctx.Init(); 
+    var seq := new tls_opts_seq;
+    seq.Init();
+    var y := set_certificate_chain(seq, conn_ctx, "filepath");
     //assert the crap out of it
-    // assert(y == 1);
+    assert(y == 1);
 
 
     assert sock.Secure();
