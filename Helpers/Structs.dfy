@@ -50,6 +50,8 @@ module Structs
     var cipher_list_set : bool;
     var app_path : string;
     var CA_locations_set : bool;
+    var min_proto_set : bool;
+    var max_proto_set : bool;
 
     method Init()
       modifies this
@@ -89,6 +91,8 @@ module Structs
         requires references != 0
         requires cert_store.Length > 0
         requires CA_locations_set == true
+        requires min_proto_set == true
+        requires max_proto_set == true
     {
       1 == 1
     }
@@ -147,10 +151,16 @@ module Structs
     var tls : string; // filepath to cert chain file
 
     method Init()
-      modifies this
+      // modifies tls
       ensures tls == ""
     {
       tls := "";
+    }
+
+    method setTLS(tls : string)
+      modifies this.tls
+    {
+      this.tls := tls;
     }
   }
 

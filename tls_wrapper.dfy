@@ -44,6 +44,10 @@ module tls_wrapper {
       assert ssa_config != null;
       assert ssa_config.trust_store != "";
 
+      // set min/max proto versions
+      tls_ctx.set_min_proto := true;
+      tls_ctx.set_max_proto := true;
+
       // sets things on tls_ctx
       tls_ctx.cipher_list_set := true; // ensure SSL_CTX_set_cipher_list is called
       store_file := ssa_config.trust_store;
@@ -75,7 +79,7 @@ module tls_wrapper {
         if conn_ctx != null {
           // SSL_use_certificate_chain_file here loads
           // contents of filepath into conn_ctx.tls
-          conn_ctx.tls := filepath;
+          conn_ctx.setTLS(filepath);
           assert conn_ctx.tls != "";
           return 1;
         }

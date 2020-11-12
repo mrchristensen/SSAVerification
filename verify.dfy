@@ -27,7 +27,10 @@ module verify {
     var y := set_certificate_chain(seq, conn_ctx, "filepath");
     //assert the crap out of it
     assert(y == 1);
-
+    assert(conn_ctx.tls == "");
+    assert(|tls_opts_seq.opts_list| != 0);
+    assert(tls_opts_seq != null)
+    assert(|tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|))
 
     assert sock.Secure();
   }
