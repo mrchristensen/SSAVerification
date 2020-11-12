@@ -11,6 +11,7 @@ module tls_wrapper {
 
     method tls_opts_create(path : string) returns (opts : tls_opts?)
       requires path != ""
+      //modifies this; //'this' is not allowed in a 'static' context
       ensures opts != null
       ensures opts.tls_ctx != null
       ensures opts.tls_ctx.meth == "SSLv23_method"
@@ -38,7 +39,7 @@ module tls_wrapper {
 
       // state changes from SSL_CTX_set_session_id_context
       tls_ctx.sid_ctx_length := 1;
-      tls_ctx.sid_ctx := "1";
+      tls_ctx.sid_ctx := "1"; //This is a string, not an int
 
       ssa_config := get_app_config(path); // must set trust_store or error
       assert ssa_config != null;
@@ -66,6 +67,7 @@ module tls_wrapper {
         requires tls_opts_seq != null
         requires filepath != ""
         requires |tls_opts_seq.opts_list| != 0
+        modifies conn_ctx;
         ensures conn_ctx.tls == ""
         ensures y != 0
         ensures |tls_opts_seq.opts_list| != 0

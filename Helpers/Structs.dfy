@@ -29,7 +29,7 @@ module Structs
       reads this
       reads cipherSuites
       reads alpnProtos
-      requires forall k :: 0 <= k < cipherSuites.Length 
+      requires forall k :: 0 <= k < cipherSuites.Length
         ==> cipherSuites[k] != null && cipherSuites[k].secure()
       requires remHostname != ""
       requires forall k :: 0 <= k < alpnProtos.Length ==> alpnProtos[k] != ""
@@ -181,7 +181,7 @@ module Structs
     // int32_t strength_bits;      /* Number of bits really used */
     // uint32_t alg_bits;          /* Number of bits for algorithm */
 
-    predicate secure() 
+    predicate secure()
     {
       1 == 1 // TODO - look into how to verify security of SSL_CIPHER
     }
