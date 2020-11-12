@@ -21,16 +21,16 @@ module verify {
 
     //call set_cert_chain
     var conn_ctx := new tls_conn_ctx;
-    conn_ctx.Init(); 
-    var seq := new tls_opts_seq;
-    seq.Init();
-    var y := set_certificate_chain(seq, conn_ctx, "filepath");
+    conn_ctx.Init();
+    var tls_seq := new tls_opts_seq;
+    tls_seq.Init();
+    var y := set_certificate_chain(tls_seq, conn_ctx, "filepath");
     //assert the crap out of it
     assert(y == 1);
     assert(conn_ctx.tls == "");
     assert(|tls_opts_seq.opts_list| != 0);
     assert(tls_opts_seq != null)
-    assert(|tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|))
+    // assert(|tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|))
 
     assert sock.Secure();
   }

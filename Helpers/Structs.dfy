@@ -151,14 +151,14 @@ module Structs
     var tls : string; // filepath to cert chain file
 
     method Init()
-      // modifies tls
+      modifies this
       ensures tls == ""
     {
       tls := "";
     }
 
     method setTLS(tls : string)
-      modifies this.tls
+      modifies this
     {
       this.tls := tls;
     }

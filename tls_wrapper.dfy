@@ -45,8 +45,8 @@ module tls_wrapper {
       assert ssa_config.trust_store != "";
 
       // set min/max proto versions
-      tls_ctx.set_min_proto := true;
-      tls_ctx.set_max_proto := true;
+      tls_ctx.min_proto_set := true;
+      tls_ctx.max_proto_set := true;
 
       // sets things on tls_ctx
       tls_ctx.cipher_list_set := true; // ensure SSL_CTX_set_cipher_list is called
