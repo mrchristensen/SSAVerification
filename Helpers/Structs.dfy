@@ -76,13 +76,15 @@ module Structs
       modifies this
       modifies cert_store
       requires cert != null
-      requires cert_store.Length >= maxSize
+      requires cert_store.Length == maxSize
       requires num_certs < maxSize
+      requires num_certs < cert_store.Length
+      ensures num_certs == old(num_certs) + 1
       // ensures forall i | 0 <= i < cert_store.Length :: !(0 <= num_certs < maxSize) ==> cert_store[i] == old(cert_store[num_certs]) //TODO: https://stackoverflow.com/questions/49589887/specifying-modification-of-part-of-an-array-in-dafny
-      // ensures cert_store[old(num_certs)] == cert
+      ensures cert_store[old(num_certs)] == cert
       // ensures cert_store contains cert
     {
-      // cert_store[num_certs] := cert;
+      cert_store[num_certs] := cert;
       num_certs := num_certs + 1;
     }
 
@@ -104,7 +106,7 @@ module Structs
 
     method Init()
       modifies this
-      // ensures cert == ""
+      ensures cert == "" //Todo make this meaningful
     {
       cert := "";
     }
@@ -159,6 +161,7 @@ module Structs
 
     method setTLS(tls : string)
       modifies this
+      ensures this.tls == tls;
     {
       this.tls := tls;
     }
