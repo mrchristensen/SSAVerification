@@ -73,16 +73,15 @@ module Structs
     }
 
     method addX509(cert : X509?)
-      modifies this
+    //Todo Look into modifies a`[j] (pg 37)
+      modifies `num_certs //Back tick for primatives - FrameFields
       modifies cert_store
       requires cert != null
-      requires cert_store.Length == maxSize
-      requires num_certs < maxSize
-      requires num_certs < cert_store.Length
+      requires 0 <= num_certs < cert_store.Length - 1
       ensures num_certs == old(num_certs) + 1
-      // ensures forall i | 0 <= i < cert_store.Length :: !(0 <= num_certs < maxSize) ==> cert_store[i] == old(cert_store[num_certs]) //TODO: https://stackoverflow.com/questions/49589887/specifying-modification-of-part-of-an-array-in-dafny
+      ensures num_certs < cert_store.Length
+      ensures forall i : int :: 0 <= i < old(num_certs) ==> cert_store[i] == old(cert_store[i]) //Todo look into triggers
       ensures cert_store[old(num_certs)] == cert
-      // ensures cert_store contains cert
     {
       cert_store[num_certs] := cert;
       num_certs := num_certs + 1;
