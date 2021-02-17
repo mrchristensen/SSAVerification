@@ -26,8 +26,7 @@ module OpenSSLHelpers {
     ensures fresh(ret.cert_store)
     ensures ret.references == 1
   {
-    ret := new SSL_CTX;
-    ret.Init();
+    ret := new SSL_CTX.Init();
     assert fresh(ret.cert_store);
     assert ret.references == 1;
 
@@ -41,8 +40,7 @@ module OpenSSLHelpers {
     ensures ctx.num_certs != old(ctx.num_certs)
   {
     // in C code, it parses object from file but we'll just make an empty one for now
-    var x509 := new X509;
-    x509.Init();
+    var x509 := new X509.Init();
     ctx.addX509(x509);
     ret := 0;
   }

@@ -26,10 +26,10 @@ module tls_wrapper {
       var tls_ctx : SSL_CTX;
       var store_file : string; // trust store
 
-      opts := new tls_opts;
+      opts := new tls_opts.Init();
 
       // initialized with SSL_CTX_new
-      tls_ctx.Init();
+      // tls_ctx.Init();
       tls_ctx.meth := "SSLv23_method";
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
@@ -74,8 +74,8 @@ module tls_wrapper {
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
       {
-        var cur_opts := new tls_opts;
-        var new_opts := new tls_opts;
+        var cur_opts := new tls_opts.Init();
+        var new_opts := new tls_opts.Init();
 
         // if a connection already exists, set the certs on the existing connection
         if conn_ctx != null {

@@ -9,6 +9,6 @@ module Config {
   method get_app_config(app_path : string) returns (config : ssa_config_t?)
   {
     // for now we are using an empty config
-    config := new ssa_config_t;
+    config := new ssa_config_t.Init();
   }
 }

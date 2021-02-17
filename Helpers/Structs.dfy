@@ -12,8 +12,7 @@ module Structs
     var alpnProtos : array<string>;
     var cipherSuites : array<SSL_CIPHER?>;
 
-    method Init(kSize : int, pKey : string, rHostname : string)
-      modifies this
+    constructor Init(kSize : int, pKey : string, rHostname : string)
       ensures fresh(alpnProtos)
       ensures fresh(cipherSuites)
       ensures privateKey == pKey
@@ -53,8 +52,7 @@ module Structs
     var min_proto_set : bool;
     var max_proto_set : bool;
 
-    method Init()
-      modifies this
+    constructor Init()
       // modifies cert_store
       ensures fresh(cert_store)
       ensures references == 1
@@ -103,8 +101,7 @@ module Structs
   {
     var cert : string;
 
-    method Init()
-      modifies this
+    constructor Init()
       ensures cert == "" //Todo make this meaningful
     {
       cert := "";
@@ -123,14 +120,12 @@ module Structs
     // int is_server
     // char alpn_string[ALPN_STRING_MAXLEN]
 
-    method Init()
-      modifies this
+    constructor Init()
       ensures tls_ctx != null
       // ensures app_path != ""
     {
-      tls_ctx := new SSL_CTX;
-      tls_ctx.Init();
-      app_path := "";
+      tls_ctx := new SSL_CTX.Init();
+      app_path := ""; // todo does this need to be meaningful?
     }
   }
 
@@ -138,9 +133,8 @@ module Structs
   {
     var opts_list : seq<tls_opts?>;
 
-    method Init()
-      modifies this
-      modifies opts_list
+    constructor Init()
+      // modifies opts_list
       ensures fresh(opts_list)
     {
       opts_list := [];
@@ -151,8 +145,7 @@ module Structs
   {
     var tls : string; // filepath to cert chain file
 
-    method Init()
-      modifies this
+    constructor Init()
       ensures tls == ""
     {
       tls := "";
@@ -192,5 +185,10 @@ module Structs
   class ssa_config_t
   {
     var trust_store : string;
+
+    constructor Init()
+    {
+
+    }
   }
 }
