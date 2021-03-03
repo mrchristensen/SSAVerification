@@ -63,12 +63,12 @@ module tls_wrapper {
       return opts;
     }
 
-    method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx, filepath : string) returns (y : int)
+    method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx?, filepath : string) returns (y : int)
         requires tls_opts_seq != null
         requires filepath != ""
         requires |tls_opts_seq.opts_list| != 0
         modifies conn_ctx;
-        ensures conn_ctx.tls == "" //This doesn't make sense with line 85
+        // ensures conn_ctx.tls == "" //This doesn't make sense with line 85
         ensures y != 0
         ensures |tls_opts_seq.opts_list| != 0
         ensures tls_opts_seq != null
