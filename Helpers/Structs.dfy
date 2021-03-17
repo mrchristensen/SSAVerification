@@ -70,11 +70,10 @@ module Structs
       cipher_list_set := false;
     }
 
-    method addX509(cert : X509?)
+    method addX509(cert : X509)
     //Todo Look into modifies a`[j] (pg 37)
       modifies `num_certs //Back tick for primatives - FrameFields
       modifies cert_store
-      requires cert != null
       requires 0 <= num_certs < cert_store.Length - 1
       ensures num_certs == old(num_certs) + 1
       ensures num_certs < cert_store.Length
@@ -101,10 +100,12 @@ module Structs
   {
     var cert : string;
 
-    constructor Init()
-      ensures cert == "" //Todo make this meaningful
+    constructor Init(file : string)
+      requires file != ""
+      ensures cert == file //Todo make this meaningful
+      ensures cert != ""
     {
-      cert := "";
+      cert := file;
     }
   }
 

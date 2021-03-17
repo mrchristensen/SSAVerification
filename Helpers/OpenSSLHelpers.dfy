@@ -35,12 +35,14 @@ module OpenSSLHelpers {
 
   // loads a certificate chain from B<file> into B<ctx>.
   method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?) returns (ret : int)
+    modifies ctx.cert_store
+    modifies ctx`num_certs
     requires file != ""
     requires ctx != null
-    ensures ctx.num_certs != old(ctx.num_certs)
+    ensures ctx.num_certs == old(ctx.num_certs) + 1
   {
     // in C code, it parses object from file but we'll just make an empty one for now
-    var x509 := new X509.Init();
+    var x509 := new X509.Init(file);
     ctx.addX509(x509);
     ret := 0;
   }
