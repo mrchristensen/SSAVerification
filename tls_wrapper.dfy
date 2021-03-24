@@ -95,11 +95,11 @@ module tls_wrapper {
         cur_opts := tls_opts_seq.opts_list[0];
         // There is no cert set yet on the first SSL_CTX so we'll use that
         var get_cert:X509?;
-        get_cert := SSL_CTX_get0_certificate(cur_opts.tls_ctx);
+        get_cert := SSL_CTX_get0_certificate(cur_opts.tls_ctx); //Matt todo
 
         if (get_cert == null) { // called from OpenSSLHelpers
           var use_chain_file:int;
-          use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, cur_opts.tls_ctx);
+          use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, cur_opts.tls_ctx); //Matt todo
         	if (use_chain_file != 1) {
         		return 0; //Error: Unable to assign certificate chain
         	}
