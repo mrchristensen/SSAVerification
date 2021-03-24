@@ -73,6 +73,7 @@ module tls_wrapper {
         ensures |tls_opts_seq.opts_list| != 0
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
+        //TODO: require/ensure that the SSL_CTX_get0_certificate don't move such that num_certs > cert_store.Length - 1
       {
         var cur_opts := new tls_opts.Init();
         var new_opts := new tls_opts.Init();

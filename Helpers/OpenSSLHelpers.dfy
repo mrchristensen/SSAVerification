@@ -39,6 +39,7 @@ module OpenSSLHelpers {
     modifies ctx`num_certs
     requires file != ""
     requires ctx != null
+    requires 0 <= ctx.num_certs < ctx.cert_store.Length - 1
     ensures ctx.num_certs == old(ctx.num_certs) + 1
   {
     // in C code, it parses object from file but we'll just make an empty one for now
