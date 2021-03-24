@@ -33,6 +33,14 @@ module verify {
     // assert(|tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|))
 
     assert sock.Secure();
+
+    // TODO - when openssl is initialized for a socket, check that the following
+    // functions are called from OpenSSL
+    // SSL_library_init();
+    // OpenSSL_add_all_algorithms();
+    // ERR_load_BIO_strings();
+    // ERR_load_crypto_strings();
+    // SSL_load_error_strings();
   }
 
 }
