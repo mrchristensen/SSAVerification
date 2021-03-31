@@ -30,6 +30,7 @@ module OpenSSLHelpers {
     assert fresh(ret.cert_store);
     assert ret.references == 1;
 
+    ret.called_new_ctx := true;
     ret.meth := meth;
   }
 
@@ -53,5 +54,16 @@ module OpenSSLHelpers {
     ensures y == true
   {
     return true;
+  }
+
+  // the OpenSSL function that sets verification information
+  // made the assumption to remove the callback fucntion
+  method SSL_CTX_set_verify(ctx : SSL_CTX?, mode : int) returns (ret : int)
+    requires ctx != null
+    requires mode != -1
+  {
+    ctx.verify_mode := mode;
+    ctx.set_verify := true;
+    return 1;
   }
 }

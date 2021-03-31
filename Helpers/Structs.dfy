@@ -27,7 +27,7 @@ module Structs
     predicate Secure()
       reads this
       reads cipherSuites
-      reads alpnProtos
+      reads alpnProtos // FIXME - is it possible to denote that it reads everything inside this array? so we can remove 'reads this'
       requires forall k :: 0 <= k < cipherSuites.Length
         ==> cipherSuites[k] != null && cipherSuites[k].secure()
       requires remHostname != ""
@@ -51,6 +51,9 @@ module Structs
     var CA_locations_set : bool;
     var min_proto_set : bool;
     var max_proto_set : bool;
+    var called_new_ctx : bool;
+    var verify_mode : int; // FIXME - ctx is valid if this is set to either SSL_VERIFY_NONE or SSL_VERIFY_PEER
+    var set_verify : bool;
 
     constructor Init()
       // modifies cert_store
@@ -91,6 +94,8 @@ module Structs
         requires CA_locations_set == true
         requires min_proto_set == true
         requires max_proto_set == true
+        requires called_new_ctx == true
+        requires set_verify == true
     {
       1 == 1
     }
@@ -117,16 +122,25 @@ module Structs
   class tls_opts {
     var tls_ctx : SSL_CTX?;
     var app_path : string;
+    var is_server : int;
     // int custom_validation
-    // int is_server
     // char alpn_string[ALPN_STRING_MAXLEN]
 
     constructor Init()
+      modifies `is_server
       ensures tls_ctx != null
       // ensures app_path != ""
     {
       tls_ctx := new SSL_CTX.Init();
       app_path := ""; // todo does this need to be meaningful?
+      is_server := -1;
+    }
+
+    predicate Secure()
+      reads `is_server
+      requires is_server == 0
+    {
+      1 == 1
     }
   }
 

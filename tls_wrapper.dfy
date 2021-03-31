@@ -9,6 +9,23 @@ module tls_wrapper {
     import opened Constants
     import opened OpenSSLHelpers
 
+    method tls_opts_client_setup(tls_opts : tls_opts?) returns (ret : int)
+      requires tls_opts != null
+      requires tls_opts.tls_ctx != null
+    {
+      var tls_ctx : SSL_CTX?;
+      var verified : int;
+
+      tls_ctx := tls_opts.tls_ctx; 
+      tls_opts.is_server := 0; // fixme - there is sometimes an error here about the modifies clause
+
+      // Temporarily disable validation
+      verified := SSL_CTX_set_verify(tls_ctx, SSL_VERIFY_NONE);
+      assert verified == 1;
+
+      ret := 1;
+    }
+
     method tls_opts_create(path : string) returns (opts : tls_opts?)
       requires path != ""
       //modifies this; //'this' is not allowed in a 'static' context
@@ -23,7 +40,7 @@ module tls_wrapper {
       ensures opts.tls_ctx.CA_locations_set == true
     {
       var ssa_config : ssa_config_t;
-      var tls_ctx : SSL_CTX;
+      var tls_ctx : SSL_CTX?;
       var store_file : string; // trust store
 
       opts := new tls_opts.Init();
@@ -136,5 +153,11 @@ module tls_wrapper {
         return 1;
       }
       return 0;
+    }
+
+    // TODO - finish this
+    method connect_cb() returns ()
+    {
+      tls_opts_client_setup()
     }
 }
