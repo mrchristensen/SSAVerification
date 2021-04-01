@@ -12,12 +12,13 @@ module tls_wrapper {
     method tls_opts_client_setup(tls_opts : tls_opts?) returns (ret : int)
       requires tls_opts != null
       requires tls_opts.tls_ctx != null
+      modifies tls_opts
     {
       var tls_ctx : SSL_CTX?;
       var verified : int;
 
       tls_ctx := tls_opts.tls_ctx; 
-      tls_opts.is_server := 0; // fixme - there is sometimes an error here about the modifies clause
+      tls_opts.is_server := 0;
 
       // Temporarily disable validation
       verified := SSL_CTX_set_verify(tls_ctx, SSL_VERIFY_NONE);
@@ -156,8 +157,8 @@ module tls_wrapper {
     }
 
     // TODO - finish this
-    method connect_cb() returns ()
-    {
-      tls_opts_client_setup()
-    }
+    // method connect_cb() returns ()
+    // {
+    //   tls_opts_client_setup()
+    // }
 }
