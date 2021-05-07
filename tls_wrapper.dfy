@@ -17,9 +17,10 @@ module tls_wrapper {
       modifies tls_opts
       modifies tls_opts.tls_ctx
     {
-      var tls_ctx : SSL_CTX?;
+      var tls_ctx : SSL_CTX;
       var verified : int;
 
+      tls_ctx := new SSL_CTX.Init();
       tls_ctx := tls_opts.tls_ctx;
       tls_opts.is_server := 0;
 
@@ -41,13 +42,13 @@ module tls_wrapper {
       ensures opts.tls_ctx.CA_locations_set == true
     {
       var ssa_config : ssa_config_t;
-      var tls_ctx : SSL_CTX?;
+      var tls_ctx : SSL_CTX;
       var store_file : string; // trust store
 
       opts := new tls_opts.Init();
+      tls_ctx := new SSL_CTX.Init();
 
       // initialized with SSL_CTX_new
-      // tls_ctx.Init();
       tls_ctx.meth := "SSLv23_method";
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
