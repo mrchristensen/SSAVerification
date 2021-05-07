@@ -9,10 +9,13 @@ module tls_wrapper {
     import opened Constants
     import opened OpenSSLHelpers
 
-    method tls_opts_client_setup(tls_opts : tls_opts?) returns (ret : int)
+    method tls_opts_client_setup(tls_opts : tls_opts?)
+      returns (ret : int)
       requires tls_opts != null
       requires tls_opts.tls_ctx != null
+      ensures ret == 1
       modifies tls_opts
+      modifies tls_opts.tls_ctx
     {
       var tls_ctx : SSL_CTX?;
       var verified : int;
@@ -21,10 +24,7 @@ module tls_wrapper {
       tls_opts.is_server := 0;
 
       // Temporarily disable validation
-      verified := SSL_CTX_set_verify(tls_ctx, SSL_VERIFY_NONE);
-      assert verified == 1;
-
-      ret := 1;
+      ret := SSL_CTX_set_verify(tls_ctx, SSL_VERIFY_NONE);
     }
 
     method tls_opts_create(path : string) returns (opts : tls_opts?)
