@@ -86,12 +86,13 @@ module tls_wrapper {
     method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx?, filepath : string)
         returns (ret : int)
         requires tls_opts_seq != null
+        // requires tls_opts_seq.opts_list[0] != null
         requires filepath != ""
-        requires |tls_opts_seq.opts_list| != 0
+        requires |tls_opts_seq.opts_list| > 0
         modifies conn_ctx;
         // ensures conn_ctx.tls == "" //This doesn't make sense with line 85
         ensures ret != 0
-        ensures |tls_opts_seq.opts_list| != 0
+        ensures |tls_opts_seq.opts_list| > 0
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
         //TODO: require/ensure that the SSL_CTX_get0_certificate don't move such that num_certs > cert_store.Length - 1
