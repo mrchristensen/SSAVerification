@@ -28,7 +28,8 @@ module tls_wrapper {
       ret := SSL_CTX_set_verify(tls_ctx, SSL_VERIFY_NONE);
     }
 
-    method tls_opts_create(path : string) returns (opts : tls_opts?)
+    method tls_opts_create(path : string)
+      returns (opts : tls_opts?)
       requires path != ""
       //modifies this; //'this' is not allowed in a 'static' context
       ensures opts != null
@@ -82,13 +83,14 @@ module tls_wrapper {
       return opts;
     }
 
-    method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx?, filepath : string) returns (y : int)
+    method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx?, filepath : string)
+        returns (ret : int)
         requires tls_opts_seq != null
         requires filepath != ""
         requires |tls_opts_seq.opts_list| != 0
         modifies conn_ctx;
         // ensures conn_ctx.tls == "" //This doesn't make sense with line 85
-        ensures y != 0
+        ensures ret != 0
         ensures |tls_opts_seq.opts_list| != 0
         ensures tls_opts_seq != null
         ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
@@ -103,12 +105,14 @@ module tls_wrapper {
           // contents of filepath into conn_ctx.tls
           conn_ctx.setTLS(filepath);
           assert conn_ctx.tls != "";
-          return 1;
+          ret := 1;
+          return ret;
         }
 
         // if no connection exists, set the certs on the options
         if tls_opts_seq == null {
-          return 0;
+          ret := 0;
+          return ret;
         }
 
         cur_opts := tls_opts_seq.opts_list[0];
@@ -120,9 +124,12 @@ module tls_wrapper {
           var use_chain_file:int;
           use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, cur_opts.tls_ctx); //Matt todo
         	if (use_chain_file != 1) {
-        		return 0; //Error: Unable to assign certificate chain
+        		ret := 0;
+            return ret; //Error: Unable to assign certificate chain
         	}
-        	return 1; //Log: Using cert located at "filepath"
+
+          ret := 1;
+        	return ret; //Log: Using cert located at "filepath"
         }
 
         cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
@@ -134,27 +141,34 @@ module tls_wrapper {
         var use_chain_file:int;
         use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
         if (use_chain_file != 1) {
-        	return 0; //Error: Unable to assign certificate chain
+        	ret := 0;
+          return ret; //Error: Unable to assign certificate chain
         }
         // Add new opts to option list
         tls_opts_seq.opts_list := tls_opts_seq.opts_list + [new_opts];
-        return 1; //Log: Using cert located at "filepath"
+
+        ret := 1;
+        return ret; //Log: Using cert located at "filepath"
       }
 
     // this is called in SSA in every TLS handshake and this callback
     // should be set in the accept() entry point
-    method client_verify(store : X509_STORE_CTX?) returns (y : int)
+    method client_verify(store : X509_STORE_CTX?)
+      returns (ret : int)
       requires store != null
-      ensures y == 1
+      ensures ret == 1
     {
       // just verify that this function is called, might come back
       // and further model this
       var verified:bool;
       verified := X509_verify_cert();
       if(verified) {
-        return 1;
+        ret := 1;
+        return ret;
       }
-      return 0;
+
+      ret := 0
+      return ret;
     }
 
     // TODO - finish this

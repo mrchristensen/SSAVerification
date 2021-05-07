@@ -8,7 +8,8 @@ module OpenSSLHelpers {
   import opened HelperFunctions
 
   // return X509 object that corresponds to the ssl_ctx obj given
-  method SSL_CTX_get0_certificate(ctx : SSL_CTX?) returns (X509_ret : X509?)
+  method SSL_CTX_get0_certificate(ctx : SSL_CTX?)
+    returns (X509_ret : X509?)
     requires ctx != null
     requires ctx.X509_cert != null
     ensures X509_ret == ctx.X509_cert
@@ -20,7 +21,8 @@ module OpenSSLHelpers {
   // There is more state change to this function, but for
   // now, this is all we'll include to verify cert chain
   // property
-  method SSL_CTX_new(meth : string) returns (ret : SSL_CTX?)
+  method SSL_CTX_new(meth : string)
+    returns (ret : SSL_CTX?)
     requires meth != ""
     ensures ret != null
     ensures fresh(ret.cert_store)
@@ -35,7 +37,8 @@ module OpenSSLHelpers {
   }
 
   // loads a certificate chain from B<file> into B<ctx>.
-  method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?) returns (ret : int)
+  method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?)
+    returns (ret : int)
     modifies ctx.cert_store
     modifies ctx`num_certs
     requires file != ""
@@ -50,10 +53,12 @@ module OpenSSLHelpers {
   }
 
   // just verify that this has been called
-  method X509_verify_cert() returns (y : bool)
-    ensures y == true
+  method X509_verify_cert()
+    returns (ret : bool)
+    ensures ret == true
   {
-    return true;
+    ret := true
+    return ret;
   }
 
   // the OpenSSL function that sets verification information
