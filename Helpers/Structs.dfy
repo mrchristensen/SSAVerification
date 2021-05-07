@@ -127,8 +127,8 @@ module Structs
     // char alpn_string[ALPN_STRING_MAXLEN]
 
     constructor Init()
-      modifies `is_server
-      ensures tls_ctx != null
+      // modifies `is_server
+      // ensures tls_ctx != null
       // ensures app_path != ""
     {
       tls_ctx := new SSL_CTX.Init();
