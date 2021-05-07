@@ -17,7 +17,7 @@ module tls_wrapper {
       var tls_ctx : SSL_CTX?;
       var verified : int;
 
-      tls_ctx := tls_opts.tls_ctx; 
+      tls_ctx := tls_opts.tls_ctx;
       tls_opts.is_server := 0;
 
       // Temporarily disable validation
