@@ -20,8 +20,8 @@ module Structs
     {
       privateKey := pKey;
       remHostname := rHostname;
-      alpnProtos := new string[maxSize];
-      cipherSuites := new SSL_CIPHER?[maxSize];
+      alpnProtos := new string[MAX_SIZE];
+      cipherSuites := new SSL_CIPHER?[MAX_SIZE];
     }
 
     predicate Secure()
@@ -60,11 +60,11 @@ module Structs
       ensures fresh(cert_store)
       ensures references == 1
       ensures cipher_list_set == false
-      ensures cert_store.Length == maxSize
+      ensures cert_store.Length == MAX_SIZE
       ensures num_certs == 0
       ensures meth == ""
     {
-      cert_store := new X509?[maxSize];
+      cert_store := new X509?[MAX_SIZE];
       num_certs := 0;
       meth := "";
 

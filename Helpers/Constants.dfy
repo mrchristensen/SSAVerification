@@ -1,5 +1,5 @@
 module Constants {
-  const maxSize := 20;
+  const MAX_SIZE := 20;
 
   // this can change later
   const OPENSSL_VERSION_NUMBER := 0x10100000; // long long type
