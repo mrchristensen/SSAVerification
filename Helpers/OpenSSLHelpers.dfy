@@ -58,13 +58,15 @@ module OpenSSLHelpers {
 
   // the OpenSSL function that sets verification information
   // made the assumption to remove the callback fucntion
-  method SSL_CTX_set_verify(ctx : SSL_CTX?, mode : int) returns (ret : int)
+  method SSL_CTX_set_verify(ctx : SSL_CTX?, mode : int)
+    returns (ret : int)
     requires ctx != null
     requires mode != -1
+    ensures ret == 1
     modifies ctx
   {
     ctx.verify_mode := mode;
     ctx.set_verify := true;
-    return 1;
+    ret := 1;
   }
 }
