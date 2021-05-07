@@ -61,6 +61,7 @@ module OpenSSLHelpers {
   method SSL_CTX_set_verify(ctx : SSL_CTX?, mode : int) returns (ret : int)
     requires ctx != null
     requires mode != -1
+    modifies ctx
   {
     ctx.verify_mode := mode;
     ctx.set_verify := true;
