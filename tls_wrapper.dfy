@@ -167,7 +167,7 @@ module tls_wrapper {
         return ret;
       }
 
-      ret := 0
+      ret := 0;
       return ret;
     }
 

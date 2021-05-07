@@ -57,7 +57,7 @@ module OpenSSLHelpers {
     returns (ret : bool)
     ensures ret == true
   {
-    ret := true
+    ret := true;
     return ret;
   }
 
