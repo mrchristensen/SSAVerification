@@ -55,7 +55,7 @@ module tls_wrapper {
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
       assert tls_ctx.num_certs == 0;
-      assert tls_ctx.meth == "";
+      assert tls_ctx.meth == "SSLv23_method";
       assert tls_ctx.cipher_list_set == false;
 
       // state changes from SSL_CTX_set_session_id_context
@@ -63,7 +63,7 @@ module tls_wrapper {
       tls_ctx.sid_ctx := "1"; //This is a string, not an int
 
       ssa_config := get_app_config(path); // must set trust_store or error
-      assert ssa_config != null;
+      // assert ssa_config != null; //Not necessary on an object type that can't be null
       assert ssa_config.trust_store != "";
 
       // set min/max proto versions
@@ -137,9 +137,10 @@ module tls_wrapper {
 
         cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
 
-        new_opts := tls_opts_create(""); // Todo: Make this not be empty
+        new_opts := tls_opts_create(filepath);
         assert new_opts != null;
         assert new_opts.tls_ctx != null;
+        assert filepath != "";
 
         var use_chain_file:int;
         use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
