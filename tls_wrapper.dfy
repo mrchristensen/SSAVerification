@@ -86,7 +86,6 @@ module tls_wrapper {
     method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx?, filepath : string)
         returns (ret : int)
         requires tls_opts_seq != null
-        // requires tls_opts_seq.opts_list[0] != null
         requires filepath != ""
         requires |tls_opts_seq.opts_list| > 0
         modifies conn_ctx;
@@ -116,6 +115,8 @@ module tls_wrapper {
           return ret;
         }
 
+        assert tls_opts_seq != null;
+
         cur_opts := tls_opts_seq.opts_list[0];
         // There is no cert set yet on the first SSL_CTX so we'll use that
         var get_cert:X509?;
@@ -135,7 +136,7 @@ module tls_wrapper {
 
         cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
 
-        new_opts := tls_opts_create("");
+        new_opts := tls_opts_create(""); // Todo: Make this not be empty
         assert new_opts != null;
         assert new_opts.tls_ctx != null;
 
