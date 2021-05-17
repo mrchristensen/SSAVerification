@@ -47,7 +47,7 @@ module tls_wrapper {
       opts := new tls_opts.Init();
 
       // initialized with SSL_CTX_new
-      // tls_ctx.Init();
+      tls_ctx.Init();
       tls_ctx.meth := "SSLv23_method";
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
