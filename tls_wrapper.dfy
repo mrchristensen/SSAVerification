@@ -50,6 +50,10 @@ module tls_wrapper {
       tls_ctx := new SSL_CTX.Init();
 
       // initialized with SSL_CTX_new
+<<<<<<< HEAD
+      tls_ctx.Init();
+=======
+>>>>>>> 012c65f353b2bca5e2a67f56a716e5d0c1c408e8
       tls_ctx.meth := "SSLv23_method";
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
