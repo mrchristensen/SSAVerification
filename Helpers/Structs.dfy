@@ -11,6 +11,7 @@ module Structs
     var remHostname : string;
     var alpnProtos : array<string>;
     var cipherSuites : array<SSL_CIPHER?>;
+    var optsSeq : tls_opts_seq?;
 
     constructor Init(kSize : int, pKey : string, rHostname : string)
       ensures fresh(alpnProtos)
@@ -22,18 +23,20 @@ module Structs
       remHostname := rHostname;
       alpnProtos := new string[MAX_SIZE];
       cipherSuites := new SSL_CIPHER?[MAX_SIZE];
+      optsSeq := null;
     }
 
     predicate Secure()
       reads this
-      reads cipherSuites
-      reads alpnProtos // FIXME - is it possible to denote that it reads everything inside this array? so we can remove 'reads this'
-      requires forall k :: 0 <= k < cipherSuites.Length
-        ==> cipherSuites[k] != null && cipherSuites[k].secure()
-      requires remHostname != ""
-      requires forall k :: 0 <= k < alpnProtos.Length ==> alpnProtos[k] != ""
+      reads this`cipherSuites
+      reads this.alpnProtos
+      reads this.optsSeq
     {
-      1 == 1
+      remHostname != "" 
+      && optsSeq.Secure() 
+      && (forall k :: 0 <= k < cipherSuites.Length
+        ==> cipherSuites[k] != null && cipherSuites[k].Secure()) 
+      && (forall j :: 0 <= j < alpnProtos.Length ==> alpnProtos[j] != "")
     }
   }
 
@@ -87,7 +90,7 @@ module Structs
       num_certs := num_certs + 1;
     }
 
-    predicate Valid()
+    predicate Secure()
         reads this
         requires references != 0
         requires cert_store.Length > 0
@@ -137,10 +140,16 @@ module Structs
     }
 
     predicate Secure()
-      reads `is_server
-      requires is_server == 0
+      reads this`is_server
+      // reads this.tls_ctx`references
+      reads this.tls_ctx.cert_store
+      reads this.tls_ctx`CA_locations_set
+      reads this.tls_ctx`min_proto_set
+      reads this.tls_ctx`max_proto_set
+      reads this.tls_ctx`called_new_ctx
+      reads this.tls_ctx`set_verify
     {
-      1 == 1
+      is_server == 0 && this.tls_ctx.Secure()
     }
   }
 
@@ -153,6 +162,13 @@ module Structs
       ensures fresh(opts_list)
     {
       opts_list := [];
+    }
+
+    predicate Secure()
+      reads this`opts_list
+      reads this.opts_list
+    {
+      forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
     }
   }
 
@@ -191,9 +207,11 @@ module Structs
     // int32_t strength_bits;      /* Number of bits really used */
     // uint32_t alg_bits;          /* Number of bits for algorithm */
 
-    predicate secure()
+    predicate Secure()
+      reads `valid  // FIXME - what is valid? what does it mean?
+      reads `name
     {
-      1 == 1 // TODO - look into how to verify security of SSL_CIPHER
+      valid == 1 && name != ""
     }
   }
 
