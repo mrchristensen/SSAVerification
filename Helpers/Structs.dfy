@@ -32,10 +32,10 @@ module Structs
       reads this.alpnProtos
       reads this.optsSeq
     {
-      remHostname != "" 
-      && optsSeq.Secure() 
+      remHostname != ""
+      && optsSeq.Secure()
       && (forall k :: 0 <= k < cipherSuites.Length
-        ==> cipherSuites[k] != null && cipherSuites[k].Secure()) 
+        ==> cipherSuites[k] != null && cipherSuites[k].Secure())
       && (forall j :: 0 <= j < alpnProtos.Length ==> alpnProtos[j] != "")
     }
   }
@@ -131,7 +131,7 @@ module Structs
 
     constructor Init()
       // modifies `is_server
-      // ensures tls_ctx != null
+      ensures tls_ctx != null
       // ensures app_path != ""
     {
       tls_ctx := new SSL_CTX.Init();
@@ -155,7 +155,7 @@ module Structs
 
   class tls_opts_seq
   {
-    var opts_list : seq<tls_opts?>;
+    var opts_list : seq<tls_opts>;
 
     constructor Init()
       // modifies opts_list
