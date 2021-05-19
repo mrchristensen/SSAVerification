@@ -80,7 +80,7 @@ module tls_wrapper {
       // to do later - ensure that ssa_config.randseed_path is set
 
       opts.tls_ctx := tls_ctx;
-      opts.app_path := path;
+      opts.tls_ctx.app_path := path;
       return opts;
     }
 
