@@ -41,6 +41,7 @@ module tls_wrapper {
       ensures opts.tls_ctx.cipher_list_set == true
       ensures opts.tls_ctx.app_path == path
       ensures opts.tls_ctx.CA_locations_set == true
+      ensures 0 <= opts.tls_ctx.num_certs < opts.tls_ctx.cert_store.Length - 1
     {
       var ssa_config : ssa_config_t;
       var tls_ctx : SSL_CTX;
@@ -86,9 +87,14 @@ module tls_wrapper {
 
     method set_certificate_chain(tls_opts_seq : tls_opts_seq?, conn_ctx : tls_conn_ctx?, filepath : string)
         returns (ret : int)
+        modifies tls_opts_seq`opts_list
         requires tls_opts_seq != null
         requires filepath != ""
         requires |tls_opts_seq.opts_list| > 0
+        // requires tls_opts_seq.opts_list[0] != null
+        requires tls_opts_seq.opts_list[0].tls_ctx != null
+        requires tls_opts_seq.opts_list[0].tls_ctx.X509_cert != null
+        // requires tls_opts_seq.opts_list[0] != null
         modifies conn_ctx;
         // ensures conn_ctx.tls == "" //This doesn't make sense with line 85
         ensures ret != 0
@@ -119,6 +125,7 @@ module tls_wrapper {
         assert tls_opts_seq != null;
 
         cur_opts := tls_opts_seq.opts_list[0];
+
         // There is no cert set yet on the first SSL_CTX so we'll use that
         var get_cert:X509?;
         get_cert := SSL_CTX_get0_certificate(cur_opts.tls_ctx); //Matt todo
@@ -144,10 +151,12 @@ module tls_wrapper {
 
         var use_chain_file:int;
         use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
+
         if (use_chain_file != 1) {
         	ret := 0;
           return ret; //Error: Unable to assign certificate chain
         }
+
         // Add new opts to option list
         tls_opts_seq.opts_list := tls_opts_seq.opts_list + [new_opts];
 
