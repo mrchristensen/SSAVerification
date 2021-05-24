@@ -92,15 +92,14 @@ module Structs
 
     predicate Secure()
         reads this
-        requires references != 0
-        requires cert_store.Length > 0
-        requires CA_locations_set == true
-        requires min_proto_set == true
-        requires max_proto_set == true
-        requires called_new_ctx == true
-        requires set_verify == true
     {
-      1 == 1
+         references != 0
+      // && cert_store.Length > 0
+      // && CA_locations_set == true
+      // && min_proto_set == true
+      // && max_proto_set == true
+      // && called_new_ctx == true
+      // && set_verify == true
     }
   }
 
@@ -140,16 +139,19 @@ module Structs
     }
 
     predicate Secure()
-      reads this`is_server
+      reads this
+      reads this.tls_ctx
       // reads this.tls_ctx`references
-      reads this.tls_ctx.cert_store
-      reads this.tls_ctx`CA_locations_set
-      reads this.tls_ctx`min_proto_set
-      reads this.tls_ctx`max_proto_set
-      reads this.tls_ctx`called_new_ctx
-      reads this.tls_ctx`set_verify
+      // reads this.tls_ctx.cert_store
+      // reads this.tls_ctx`CA_locations_set
+      // reads this.tls_ctx`min_proto_set
+      // reads this.tls_ctx`max_proto_set
+      // reads this.tls_ctx`called_new_ctx
+      // reads this.tls_ctx`set_verify
     {
-      is_server == 0 && this.tls_ctx.Secure()
+         is_server == 0  
+      && this.tls_ctx != null
+      && this.tls_ctx.Secure()
     }
   }
 
@@ -165,10 +167,14 @@ module Structs
     }
 
     predicate Secure()
-      reads this`opts_list
-      reads this.opts_list
+      reads this
+      reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
+      reads set n | 0 <= n < |this.opts_list| :: (this.opts_list[n]).tls_ctx
+      // reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
+      
     {
-      forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
+     |opts_list| == 0 || opts_list[0].Secure()
+      // forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
     }
   }
 
