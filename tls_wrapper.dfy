@@ -29,7 +29,7 @@ module tls_wrapper {
     }
 
     method tls_opts_create(path : string)
-      returns (opts : tls_opts?)
+      returns (opts : tls_opts)
       requires path != ""
       //modifies this; //'this' is not allowed in a 'static' context
       ensures opts != null
@@ -90,7 +90,7 @@ module tls_wrapper {
         modifies tls_opts_seq`opts_list
         requires tls_opts_seq != null
         requires filepath != ""
-        requires |tls_opts_seq.opts_list| > 0
+        requires tls_opts_seq.opts_list.Length > 0
         // requires tls_opts_seq.opts_list[0] != null
         requires tls_opts_seq.opts_list[0].tls_ctx != null
         requires tls_opts_seq.opts_list[0].tls_ctx.X509_cert != null
@@ -98,9 +98,9 @@ module tls_wrapper {
         modifies conn_ctx;
         // ensures conn_ctx.tls == "" //This doesn't make sense with line 85
         ensures ret != 0
-        ensures |tls_opts_seq.opts_list| > 0
+        ensures tls_opts_seq.opts_list.Length > 0
         ensures tls_opts_seq != null
-        ensures |tls_opts_seq.opts_list| >= old(|tls_opts_seq.opts_list|)
+        ensures tls_opts_seq.opts_list.Length >= old(tls_opts_seq.opts_list.Length)
         //TODO: require/ensure that the SSL_CTX_get0_certificate don't move such that num_certs > cert_store.Length - 1
       {
         var cur_opts := new tls_opts.Init();
@@ -142,7 +142,7 @@ module tls_wrapper {
         	return ret; //Log: Using cert located at "filepath"
         }
 
-        cur_opts := tls_opts_seq.opts_list[|tls_opts_seq.opts_list| - 1];
+        cur_opts := tls_opts_seq.opts_list[tls_opts_seq.opts_list.Length - 1];
 
         new_opts := tls_opts_create(filepath);
         assert new_opts != null;
@@ -158,17 +158,23 @@ module tls_wrapper {
         }
 
         // Add new opts to option list
+
+        // note - I tried this block of code but it also doesn't work
+        // var len := tls_opts_seq.opts_list.Length; 
+        // var new_opts_arr := new tls_opts[len + 1];
+        // forall i : int :: 0 <= i < len ==> new_opts_arr[i] := tls_opts_seq.opts_list[i];
+        // new_opts_arr[len] := new_opts;
+
         tls_opts_seq.opts_list := tls_opts_seq.opts_list + [new_opts];
 
-        ret := 1;
-        return ret; //Log: Using cert located at "filepath"
+        return 1; //Log: Using cert located at "filepath"
       }
 
     // this is called in SSA in every TLS handshake and this callback
     // should be set in the accept() entry point
-    method client_verify(store : X509_STORE_CTX?)
+    method client_verify(ctx : SSL_CTX?) // changed from x509 store ctx to ssl ctx
       returns (ret : int)
-      requires store != null
+      requires ctx.cert_store != null
       ensures ret == 1
     {
       // just verify that this function is called, might come back

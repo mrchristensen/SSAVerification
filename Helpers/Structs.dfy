@@ -122,7 +122,7 @@ module Structs
       cert := file;
     }
   }
-
+  
   class tls_opts {
     var tls_ctx : SSL_CTX?;
     var app_path : string;
@@ -155,7 +155,7 @@ module Structs
 
     constructor Init()
       ensures fresh(opts_list)
-      ensures opts_list != null
+      // ensures opts_list != null
     {
       opts_list := new array<tls_opts>;
     }

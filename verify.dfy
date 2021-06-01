@@ -12,7 +12,6 @@ module verify {
     var hostname := "hostname";
     var sock := new Socket.Init(256, privateKey, hostname);
   
-    // sock.Init(256, privateKey, hostname);
     // assert all properties
     assert sock.privateKey == "privateKey";
     assert sock.remHostname == hostname;
@@ -28,9 +27,9 @@ module verify {
     //assert the crap out of it
     assert(y == 1);
     assert(conn_ctx.tls == "");
-    assert(|tls_seq.opts_list| != 0);
+    assert(tls_seq.opts_list.Length != 0);
     assert(tls_seq != null);
-    assert(|tls_seq.opts_list| >= old(|tls_seq.opts_list|));
+    assert(tls_seq.opts_list.Length >= old(tls_seq.opts_list.Length));
     sock.optsSeq := tls_seq;
 
     assert sock.Secure();
