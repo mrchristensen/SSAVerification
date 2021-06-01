@@ -23,17 +23,24 @@ module Structs
       remHostname := rHostname;
       alpnProtos := new string[MAX_SIZE];
       cipherSuites := new SSL_CIPHER?[MAX_SIZE];
-      optsSeq := null;
+      optsSeq := new tls_opts_seq.Init();
     }
 
     predicate Secure()
       reads this
-      reads this`cipherSuites
+      reads this.cipherSuites
       reads this.alpnProtos
       reads this.optsSeq
+      requires optsSeq != null
+      reads optsSeq.opts_list
+      reads set m | 0 <= m < cipherSuites.Length :: cipherSuites[m]
+      reads set l | 0 <= l < optsSeq.opts_list.Length :: (optsSeq.opts_list[l])
+      reads set n | 0 <= n < optsSeq.opts_list.Length :: (optsSeq.opts_list[n]).tls_ctx
     {
       remHostname != ""
+      && optsSeq != null
       && optsSeq.Secure()
+      && cipherSuites.Length != 0
       && (forall k :: 0 <= k < cipherSuites.Length
         ==> cipherSuites[k] != null && cipherSuites[k].Secure())
       && (forall j :: 0 <= j < alpnProtos.Length ==> alpnProtos[j] != "")
@@ -93,13 +100,13 @@ module Structs
     predicate Secure()
         reads this
     {
-         references != 0
-      // && cert_store.Length > 0
-      // && CA_locations_set == true
-      // && min_proto_set == true
-      // && max_proto_set == true
-      // && called_new_ctx == true
-      // && set_verify == true
+      references != 0
+      && cert_store.Length > 0
+      && CA_locations_set == true
+      && min_proto_set == true
+      && max_proto_set == true
+      && called_new_ctx == true
+      && set_verify == true
     }
   }
 
@@ -116,11 +123,6 @@ module Structs
     }
   }
 
-  class X509_STORE_CTX
-  {
-
-  }
-
   class tls_opts {
     var tls_ctx : SSL_CTX?;
     var app_path : string;
@@ -129,9 +131,8 @@ module Structs
     // char alpn_string[ALPN_STRING_MAXLEN]
 
     constructor Init()
-      // modifies `is_server
       ensures tls_ctx != null
-      // ensures app_path != ""
+      ensures fresh(tls_ctx)
     {
       tls_ctx := new SSL_CTX.Init();
       app_path := ""; // todo does this need to be meaningful?
@@ -141,40 +142,31 @@ module Structs
     predicate Secure()
       reads this
       reads this.tls_ctx
-      // reads this.tls_ctx`references
-      // reads this.tls_ctx.cert_store
-      // reads this.tls_ctx`CA_locations_set
-      // reads this.tls_ctx`min_proto_set
-      // reads this.tls_ctx`max_proto_set
-      // reads this.tls_ctx`called_new_ctx
-      // reads this.tls_ctx`set_verify
     {
-         is_server == 0  
-      && this.tls_ctx != null
-      && this.tls_ctx.Secure()
+      is_server == 0  
+      && tls_ctx != null
+      && tls_ctx.Secure()
     }
   }
 
   class tls_opts_seq
   {
-    var opts_list : seq<tls_opts>;
+    var opts_list : array<tls_opts>;
 
     constructor Init()
-      // modifies opts_list
       ensures fresh(opts_list)
+      ensures opts_list != null
     {
-      opts_list := [];
+      opts_list := new array<tls_opts>;
     }
 
     predicate Secure()
       reads this
-      reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
-      reads set n | 0 <= n < |this.opts_list| :: (this.opts_list[n]).tls_ctx
-      // reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
-      
+      reads this.opts_list
+      reads set m | 0 <= m < this.opts_list.Length :: (this.opts_list[m])
+      reads set n | 0 <= n < this.opts_list.Length :: (this.opts_list[n]).tls_ctx
     {
-     |opts_list| == 0 || opts_list[0].Secure()
-      // forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
+      opts_list.Length == 0 || forall i : int :: 0 <= i < opts_list.Length ==> opts_list[i].Secure()
     }
   }
 
