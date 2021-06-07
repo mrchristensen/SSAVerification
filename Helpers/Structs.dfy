@@ -34,8 +34,8 @@ module Structs
       requires optsSeq != null
       reads optsSeq.opts_list
       reads set m | 0 <= m < cipherSuites.Length :: cipherSuites[m]
-      reads set l | 0 <= l < optsSeq.opts_list.Length :: (optsSeq.opts_list[l])
-      reads set n | 0 <= n < optsSeq.opts_list.Length :: (optsSeq.opts_list[n]).tls_ctx
+      reads set l | 0 <= l < |optsSeq.opts_list| :: (optsSeq.opts_list[l])
+      reads set n | 0 <= n < |optsSeq.opts_list| :: (optsSeq.opts_list[n]).tls_ctx
     {
       remHostname != ""
       && optsSeq != null
@@ -151,22 +151,22 @@ module Structs
 
   class tls_opts_seq
   {
-    var opts_list : array<tls_opts>;
+    var opts_list : seq<tls_opts>;
 
     constructor Init()
       ensures fresh(opts_list)
       // ensures opts_list != null
     {
-      opts_list := new array<tls_opts>;
+      opts_list := [];
     }
 
     predicate Secure()
       reads this
       reads this.opts_list
-      reads set m | 0 <= m < this.opts_list.Length :: (this.opts_list[m])
-      reads set n | 0 <= n < this.opts_list.Length :: (this.opts_list[n]).tls_ctx
+      reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
+      reads set n | 0 <= n < |this.opts_list| :: (this.opts_list[n]).tls_ctx
     {
-      opts_list.Length == 0 || forall i : int :: 0 <= i < opts_list.Length ==> opts_list[i].Secure()
+      |opts_list| == 0 || forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
     }
   }
 

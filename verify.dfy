@@ -27,9 +27,9 @@ module verify {
     //assert the crap out of it
     assert(y == 1);
     assert(conn_ctx.tls == "");
-    assert(tls_seq.opts_list.Length != 0);
+    assert(|tls_seq.opts_list| != 0);
     assert(tls_seq != null);
-    assert(tls_seq.opts_list.Length >= old(tls_seq.opts_list.Length));
+    assert(|tls_seq.opts_list| >= old(|tls_seq.opts_list|));
     sock.optsSeq := tls_seq;
 
     assert sock.Secure();
