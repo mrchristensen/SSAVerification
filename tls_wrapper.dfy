@@ -160,7 +160,7 @@ module tls_wrapper {
         // Add new opts to option list
 
         // note - I tried this block of code but it also doesn't work
-        // var len := tls_opts_seq.opts_list.Length; 
+        // var len := tls_opts_seq.opts_list.Length;
         // var new_opts_arr := new tls_opts[len + 1];
         // forall i : int :: 0 <= i < len ==> new_opts_arr[i] := tls_opts_seq.opts_list[i];
         // var i := 0;

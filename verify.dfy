@@ -11,7 +11,7 @@ module verify {
     var privateKey := "privateKey";
     var hostname := "hostname";
     var sock := new Socket.Init(256, privateKey, hostname);
-  
+
     // assert all properties
     assert sock.privateKey == "privateKey";
     assert sock.remHostname == hostname;

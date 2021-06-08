@@ -122,7 +122,7 @@ module Structs
       cert := file;
     }
   }
-  
+
   class tls_opts {
     var tls_ctx : SSL_CTX?;
     var app_path : string;
@@ -143,7 +143,7 @@ module Structs
       reads this
       reads this.tls_ctx
     {
-      is_server == 0  
+      is_server == 0
       && tls_ctx != null
       && tls_ctx.Secure()
     }
