@@ -16,11 +16,11 @@ module tls_wrapper {
       ensures ret == 1
       modifies tls_opts
       modifies tls_opts.tls_ctx
+      // modifies tls_opts.is_server
     {
-      var tls_ctx : SSL_CTX;
-      var verified : int;
+      var tls_ctx : SSL_CTX?;
+      // var verified : int;
 
-      tls_ctx := new SSL_CTX.Init();
       tls_ctx := tls_opts.tls_ctx;
       tls_opts.is_server := 0;
 
@@ -32,7 +32,7 @@ module tls_wrapper {
       returns (opts : tls_opts)
       requires path != ""
       //modifies this; //'this' is not allowed in a 'static' context
-      ensures opts != null
+      // ensures opts != null
       ensures opts.tls_ctx != null
       ensures opts.tls_ctx.meth == "SSLv23_method"
       ensures opts.tls_ctx.references == 1
@@ -51,7 +51,6 @@ module tls_wrapper {
       tls_ctx := new SSL_CTX.Init();
 
       // initialized with SSL_CTX_new
-      // tls_ctx.Init();
       tls_ctx.meth := "SSLv23_method";
       assert fresh(tls_ctx.cert_store);
       assert tls_ctx.references == 1;
@@ -158,15 +157,6 @@ module tls_wrapper {
         }
 
         // Add new opts to option list
-
-        // note - I tried this block of code but it also doesn't work
-        // var len := tls_opts_seq.opts_list.Length;
-        // var new_opts_arr := new tls_opts[len + 1];
-        // forall i : int :: 0 <= i < len ==> new_opts_arr[i] := tls_opts_seq.opts_list[i];
-        // var i := 0;
-        // while i < len:
-        // new_opts_arr[len] := new_opts;
-
         tls_opts_seq.opts_list := tls_opts_seq.opts_list + [new_opts];
 
         return 1; //Log: Using cert located at "filepath"
@@ -192,9 +182,34 @@ module tls_wrapper {
       return ret;
     }
 
-    // TODO - finish this
-    // method connect_cb() returns ()
-    // {
-    //   tls_opts_client_setup()
-    // }
+    method socket_cb(sock : Socket?) 
+      returns (ret : int)
+      requires sock != null
+      requires sock.optsSeq != null
+      requires sock.app_path != ""
+      modifies sock.optsSeq`opts_list
+      ensures ret == 1
+      ensures |sock.optsSeq.opts_list| > old(|sock.optsSeq.opts_list|)
+      ensures sock.optsSeq.opts_list[old(|sock.optsSeq.opts_list|)].tls_ctx != null
+    {
+      var opts := tls_opts_create(sock.app_path);
+      assert(opts.tls_ctx != null)
+      sock.optsSeq.opts_list := sock.optsSeq.opts_list + [opts]; // fixme - differs from ssa
+      ret := 1;
+    }
+
+    method connect_cb(sock : Socket?) 
+      returns (ret : int)
+      // modifies sock.optsSeq.opts_list[0]
+      modifies sock.optsSeq.opts_list
+      modifies sock.optsSeq.opts_list[0].tls_ctx
+      requires sock != null
+      requires sock.optsSeq != null
+      requires |sock.optsSeq.opts_list| >= 1
+      requires sock.optsSeq.opts_list[0].tls_ctx != null
+      ensures ret == 1
+    {
+      ret := tls_opts_client_setup(sock.optsSeq.opts_list[0]); // fixme - differs from ssa
+      // call tls_client_wrapper_setup
+    }
 }

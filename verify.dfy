@@ -18,12 +18,13 @@ module verify {
     assert fresh(sock.alpnProtos);
     assert fresh(sock.cipherSuites);
 
-    //call set_cert_chain
     var conn_ctx := new tls_conn_ctx.Init();
     var tls_seq := new tls_opts_seq.Init();
-    // add tls_opts_client_setup - in connect cb
-    // connect_cb()
-    var y := set_certificate_chain(tls_seq, conn_ctx, "filepath");
+
+    socket_cb(sock);
+    connect_cb(sock);
+    var y := set_certificate_chain(tls_seq, conn_ctx, sock.app_path);
+    
     //assert the crap out of it
     assert(y == 1);
     assert(conn_ctx.tls == "");
