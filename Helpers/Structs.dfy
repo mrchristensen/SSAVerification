@@ -12,18 +12,21 @@ module Structs
     var alpnProtos : array<string>;
     var cipherSuites : array<SSL_CIPHER?>;
     var optsSeq : tls_opts_seq?;
+    var app_path : string; // FIXME - app path should be in tls_opts struct
 
     constructor Init(kSize : int, pKey : string, rHostname : string)
       ensures fresh(alpnProtos)
       ensures fresh(cipherSuites)
       ensures privateKey == pKey
       ensures remHostname == rHostname
+      ensures app_path == "path"
     {
       privateKey := pKey;
       remHostname := rHostname;
       alpnProtos := new string[MAX_SIZE];
       cipherSuites := new SSL_CIPHER?[MAX_SIZE];
       optsSeq := new tls_opts_seq.Init();
+      app_path := "path";
     }
 
     predicate Secure()
