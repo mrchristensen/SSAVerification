@@ -15,7 +15,9 @@ module OpenSSLHelpers {
     ensures X509_ret == ctx.X509_cert
     ensures X509_ret != null // if SSL_CTX_use_certificate was not used - not secure
   {
-    return ctx.X509_cert;
+    if ctx.X509_cert != null {
+      return ctx.X509_cert;
+    }
   }
 
   // There is more state change to this function, but for
@@ -43,7 +45,7 @@ module OpenSSLHelpers {
     modifies ctx`num_certs
     requires file != ""
     requires ctx != null
-    requires 0 <= ctx.num_certs < ctx.cert_store.Length - 1
+    // requires 0 <= ctx.num_certs < ctx.cert_store.Length - 1
     ensures ctx.num_certs == old(ctx.num_certs) + 1
     ensures ret == 1
   {

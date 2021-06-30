@@ -11,7 +11,7 @@ module Structs
     var remHostname : string;
     var alpnProtos : array<string>;
     var cipherSuites : array<SSL_CIPHER?>;
-    var optsSeq : tls_opts_seq?;
+    var tls_opts : tls_opts?;
     var app_path : string; // FIXME - app path should be in tls_opts struct
 
     constructor Init(kSize : int, pKey : string, rHostname : string)
@@ -25,7 +25,7 @@ module Structs
       remHostname := rHostname;
       alpnProtos := new string[MAX_SIZE];
       cipherSuites := new SSL_CIPHER?[MAX_SIZE];
-      optsSeq := new tls_opts_seq.Init();
+      tls_opts := new tls_opts.Init();
       app_path := "path";
     }
 
@@ -33,16 +33,17 @@ module Structs
       reads this
       reads this.cipherSuites
       reads this.alpnProtos
-      reads this.optsSeq
-      requires optsSeq != null
-      reads optsSeq.opts_list
+      reads this.tls_opts
+      reads this.tls_opts.tls_ctx
+      requires tls_opts != null
+      // reads optsSeq.opts_list
       reads set m | 0 <= m < cipherSuites.Length :: cipherSuites[m]
-      reads set l | 0 <= l < |optsSeq.opts_list| :: (optsSeq.opts_list[l])
-      reads set n | 0 <= n < |optsSeq.opts_list| :: (optsSeq.opts_list[n]).tls_ctx
+      // reads set l | 0 <= l < |optsSeq.opts_list| :: (optsSeq.opts_list[l])
+      // reads set n | 0 <= n < |optsSeq.opts_list| :: (optsSeq.opts_list[n]).tls_ctx
     {
       remHostname != ""
-      && optsSeq != null
-      && optsSeq.Secure()
+      && tls_opts != null
+      && tls_opts.Secure()
       && cipherSuites.Length != 0
       && (forall k :: 0 <= k < cipherSuites.Length
         ==> cipherSuites[k] != null && cipherSuites[k].Secure())
@@ -152,26 +153,26 @@ module Structs
     }
   }
 
-  class tls_opts_seq
-  {
-    var opts_list : seq<tls_opts>;
+  // class tls_opts_seq
+  // {
+  //   var opts_list : seq<tls_opts>;
 
-    constructor Init()
-      ensures fresh(opts_list)
-      // ensures opts_list != null
-    {
-      opts_list := [];
-    }
+  //   constructor Init()
+  //     ensures fresh(opts_list)
+  //     // ensures opts_list != null
+  //   {
+  //     opts_list := [];
+  //   }
 
-    predicate Secure()
-      reads this
-      reads this.opts_list
-      reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
-      reads set n | 0 <= n < |this.opts_list| :: (this.opts_list[n]).tls_ctx
-    {
-      |opts_list| == 0 || forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
-    }
-  }
+  //   predicate Secure()
+  //     reads this
+  //     reads this.opts_list
+  //     reads set m | 0 <= m < |this.opts_list| :: (this.opts_list[m])
+  //     reads set n | 0 <= n < |this.opts_list| :: (this.opts_list[n]).tls_ctx
+  //   {
+  //     |opts_list| == 0 || forall i : int :: 0 <= i < |opts_list| ==> opts_list[i].Secure()
+  //   }
+  // }
 
   class tls_conn_ctx
   {
