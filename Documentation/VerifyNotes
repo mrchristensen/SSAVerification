@@ -19,15 +19,15 @@ Overview of the whole TLS Process and what to verify
 7. SSL_set_tlsext_host_name(tls, hostname) - set server name indication for client hello
 8. SSL_set_fd() --> associate socket with tls context
 9. ssl_connect(tls) != 1
-10. cert = SSL_get_peer_certificate(tls) to get certificate, should not return null  
+10. cert = SSL_get_peer_certificate(tls) to get certificate, should not return null
     validate_hostname(hostname, cert) --> all in hostname validation C file
 
 To validate hostname:
 1. hostname and cert can't be null
-2. 
+2.
 
 
 
 
 calling socket(), then connect()
- - 
+ -
