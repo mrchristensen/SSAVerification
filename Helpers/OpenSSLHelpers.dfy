@@ -45,12 +45,13 @@ module OpenSSLHelpers {
     modifies ctx`num_certs
     requires file != ""
     requires ctx != null
-    // requires 0 <= ctx.num_certs < ctx.cert_store.Length - 1
+    requires 0 <= ctx.num_certs < ctx.cert_store.Length
     ensures ctx.num_certs == old(ctx.num_certs) + 1
     ensures ret == 1
   {
     // in C code, it parses object from file but we'll just make an empty one for now
     var x509 := new X509.Init(file);
+    assert(ctx.num_certs < ctx.cert_store.Length);
     ctx.addX509(x509);
     ret := 1;
   }

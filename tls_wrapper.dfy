@@ -91,10 +91,11 @@ module tls_wrapper {
         requires filepath != ""
         requires tls_opts.tls_ctx != null
         requires tls_opts.tls_ctx.X509_cert != null
+        requires 0 <= tls_opts.tls_ctx.num_certs < tls_opts.tls_ctx.cert_store.Length
         modifies conn_ctx
         modifies tls_opts
         modifies tls_opts.tls_ctx
-        modifies tls_opts.tls_ctx`num_certs
+        // modifies tls_opts.tls_ctx`num_certs
         modifies tls_opts.tls_ctx.cert_store
         ensures ret != 0
         ensures tls_opts != null
@@ -105,8 +106,6 @@ module tls_wrapper {
 
         // if a connection already exists, set the certs on the existing connection
         if conn_ctx != null {
-          // assert(0 <= tls_opts.tls_ctx.num_certs < tls_opts.tls_ctx.cert_store.Length - 1); FIXME - assertion violation
-
           var x := SSL_CTX_use_certificate_chain_file(filepath, tls_opts.tls_ctx);
           assert x == 1;
           // SSL_use_certificate_chain_file here loads
@@ -179,19 +178,34 @@ module tls_wrapper {
       return ret;
     }
 
+    // ensures opts.tls_ctx.meth == "SSLv23_method"
+    //   ensures opts.tls_ctx.references == 1
+    //   ensures fresh(opts.tls_ctx.cert_store)
+    //   ensures opts.tls_ctx.sid_ctx_length == 1
+    //   ensures opts.tls_ctx.cipher_list_set == true
+    //   ensures opts.tls_ctx.app_path == path
+    //   ensures opts.tls_ctx.CA_locations_set == true
+    //   ensures 0 <= opts.tls_ctx.num_certs < opts.tls_ctx.cert_store.Length - 1
+    //   ensures opts.tls_ctx.num_certs == 0;
+
     method socket_cb(sock : Socket?) 
       returns (ret : int)
       requires sock != null
       requires sock.tls_opts != null
       requires sock.app_path != ""
-      // modifies sock.tls_opts
+      requires sock.tls_opts.tls_ctx != null
+      modifies sock
+      modifies sock.tls_opts
+      modifies sock.tls_opts.tls_ctx
       ensures ret == 1
-      // ensures |sock.optsSeq.opts_list| > old(|sock.optsSeq.opts_list|)
-      // ensures sock.optsSeq.opts_list[old(|sock.optsSeq.opts_list|)].tls_ctx != null
+      ensures sock.tls_opts != null;
     {
       var opts := tls_opts_create(sock.app_path);
       assert(opts.tls_ctx != null);
       assert(opts.tls_ctx.num_certs == 0);
+  
+      sock.tls_opts := opts;
+
       // sock.optsSeq.opts_list := sock.optsSeq.opts_list + [opts]; // fixme - differs from ssa
       ret := 1;
     }

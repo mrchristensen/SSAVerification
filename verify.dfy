@@ -30,11 +30,15 @@ module verify {
     var z := connect_cb(sock);
     assert(z == 1);
 
+    assert tls_opts.tls_ctx != null
+    assert sock.tls_opts.tls_ctx != null;
+    assert sock.tls_opts.tls_ctx.X509_cert != null;
+    assert 0 <= tls_opts.tls_ctx.num_certs < tls_opts.tls_ctx.cert_store.Length;
     var y := set_certificate_chain(sock.tls_opts, conn_ctx, sock.app_path);
     
     //assert the crap out of it
     assert(y == 1);
-    assert(conn_ctx.tls == "");
+    // assert(conn_ctx.tls == "");
     // assert(tls_opts != null);
     // sock.tls := tls_seq;
 

@@ -91,12 +91,15 @@ module Structs
     //Todo Look into modifies a`[j] (pg 37)
       modifies `num_certs //Back tick for primatives - FrameFields
       modifies cert_store
-      requires 0 <= num_certs < cert_store.Length - 1
+      requires 0 <= num_certs < cert_store.Length
       ensures num_certs == old(num_certs) + 1
-      ensures num_certs < cert_store.Length
+      // ensures num_certs < cert_store.Length
       ensures forall i : int :: 0 <= i < old(num_certs) ==> cert_store[i] == old(cert_store[i]) //Todo look into triggers
-      ensures cert_store[old(num_certs)] == cert
+      ensures if num_certs < cert_store.Length then cert_store[old(num_certs)] == cert else cert_store == old(cert_store)
     {
+      if(num_certs >= cert_store.Length) {
+        return;
+      }
       cert_store[num_certs] := cert;
       num_certs := num_certs + 1;
     }
