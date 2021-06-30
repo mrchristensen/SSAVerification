@@ -19,19 +19,24 @@ module verify {
     assert fresh(sock.cipherSuites);
 
     var conn_ctx := new tls_conn_ctx.Init();
-    var tls_seq := new tls_opts_seq.Init();
+    var tls_opts := new tls_opts.Init();
 
-    socket_cb(sock);
-    connect_cb(sock);
-    var y := set_certificate_chain(tls_seq, conn_ctx, sock.app_path);
+    sock.tls_opts := tls_opts;
+    sock.app_path := "path";
+
+    var x := socket_cb(sock);
+    assert(x == 1);
+
+    var z := connect_cb(sock);
+    assert(z == 1);
+
+    var y := set_certificate_chain(sock.tls_opts, conn_ctx, sock.app_path);
     
     //assert the crap out of it
     assert(y == 1);
     assert(conn_ctx.tls == "");
-    assert(|tls_seq.opts_list| != 0);
-    assert(tls_seq != null);
-    assert(|tls_seq.opts_list| >= old(|tls_seq.opts_list|));
-    sock.optsSeq := tls_seq;
+    // assert(tls_opts != null);
+    // sock.tls := tls_seq;
 
     assert sock.Secure();
   }
