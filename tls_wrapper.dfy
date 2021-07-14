@@ -185,8 +185,6 @@ module tls_wrapper {
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
       modifies sock
-      modifies sock.tls_opts
-      modifies sock.tls_opts.tls_ctx
       ensures ret == 1
       ensures sock != null
       ensures sock.tls_opts != null
@@ -202,12 +200,15 @@ module tls_wrapper {
 
     method connect_cb(sock : Socket?) 
       returns (ret : int)
-      modifies sock
-      modifies sock.tls_opts
+      
       requires sock != null
-      modifies sock.tls_opts.tls_ctx
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
+
+      modifies sock
+      // modifies sock.tls_opts
+      // modifies sock.tls_opts.tls_ctx
+
       ensures sock != null
       ensures sock.tls_opts != null
       ensures sock.tls_opts.tls_ctx != null
