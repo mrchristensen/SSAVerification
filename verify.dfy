@@ -29,7 +29,7 @@ module verify {
     var z := connect_cb(sock);
     assert(z == 1);
 
-    // assert tls_opts.tls_ctx != null
+    // assert sock.tls_opts != null;
     // assert sock.tls_opts.tls_ctx != null;
     // assert sock.tls_opts.tls_ctx.X509_cert != null;
     // assert 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length;

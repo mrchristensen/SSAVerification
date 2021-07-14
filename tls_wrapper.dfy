@@ -11,21 +11,21 @@ module tls_wrapper {
 
     method tls_opts_client_setup(tls_opts : tls_opts?)
       returns (ret : int)
+
       requires tls_opts != null
       requires tls_opts.tls_ctx != null
-      ensures ret == 1
+      
       modifies tls_opts
+      modifies tls_opts`is_server
       modifies tls_opts.tls_ctx
+
+      ensures ret == 1
       ensures tls_opts.tls_ctx != null
     {
-      var tls_ctx : SSL_CTX?;
-      // var verified : int;
-
-      tls_ctx := tls_opts.tls_ctx;
       tls_opts.is_server := 0;
 
       // Temporarily disable validation
-      ret := SSL_CTX_set_verify(tls_ctx, SSL_VERIFY_NONE);
+      ret := SSL_CTX_set_verify(tls_opts.tls_ctx, SSL_VERIFY_NONE);
     }
 
     method tls_opts_create(path : string)
@@ -206,8 +206,8 @@ module tls_wrapper {
       requires sock.tls_opts.tls_ctx != null
 
       modifies sock
-      // modifies sock.tls_opts
-      // modifies sock.tls_opts.tls_ctx
+      modifies sock.tls_opts
+      modifies sock.tls_opts.tls_ctx
 
       ensures sock != null
       ensures sock.tls_opts != null
