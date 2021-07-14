@@ -20,6 +20,8 @@ module Structs
       ensures privateKey == pKey
       ensures remHostname == rHostname
       ensures app_path == "path"
+      ensures tls_opts != null
+      ensures tls_opts.tls_ctx != null
     {
       privateKey := pKey;
       remHostname := rHostname;

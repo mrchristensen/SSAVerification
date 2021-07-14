@@ -72,6 +72,8 @@ module OpenSSLHelpers {
     requires ctx != null
     requires mode != -1
     ensures ret == 1
+    ensures ctx.verify_mode == mode
+    ensures ctx.set_verify == true
     modifies ctx
   {
     ctx.verify_mode := mode;

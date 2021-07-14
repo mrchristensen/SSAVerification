@@ -11,6 +11,8 @@ module verify {
     var privateKey := "privateKey";
     var hostname := "hostname";
     var sock := new Socket.Init(256, privateKey, hostname);
+    assert sock.tls_opts != null;
+    assert sock.tls_opts.tls_ctx != null;
 
     // assert all properties
     assert sock.privateKey == "privateKey";
@@ -19,9 +21,6 @@ module verify {
     assert fresh(sock.cipherSuites);
 
     var conn_ctx := new tls_conn_ctx.Init();
-    var tls_opts := new tls_opts.Init();
-
-    sock.tls_opts := tls_opts;
     sock.app_path := "path";
 
     var x := socket_cb(sock);
@@ -30,10 +29,10 @@ module verify {
     var z := connect_cb(sock);
     assert(z == 1);
 
-    assert tls_opts.tls_ctx != null
+    // assert tls_opts.tls_ctx != null
     assert sock.tls_opts.tls_ctx != null;
-    assert sock.tls_opts.tls_ctx.X509_cert != null;
-    assert 0 <= tls_opts.tls_ctx.num_certs < tls_opts.tls_ctx.cert_store.Length;
+    // assert sock.tls_opts.tls_ctx.X509_cert != null;
+    // assert 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length;
     var y := set_certificate_chain(sock.tls_opts, conn_ctx, sock.app_path);
     
     //assert the crap out of it

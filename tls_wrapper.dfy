@@ -16,7 +16,7 @@ module tls_wrapper {
       ensures ret == 1
       modifies tls_opts
       modifies tls_opts.tls_ctx
-      // modifies tls_opts.is_server
+      ensures tls_opts.tls_ctx != null
     {
       var tls_ctx : SSL_CTX?;
       // var verified : int;
@@ -178,51 +178,42 @@ module tls_wrapper {
       return ret;
     }
 
-    // ensures opts.tls_ctx.meth == "SSLv23_method"
-    //   ensures opts.tls_ctx.references == 1
-    //   ensures fresh(opts.tls_ctx.cert_store)
-    //   ensures opts.tls_ctx.sid_ctx_length == 1
-    //   ensures opts.tls_ctx.cipher_list_set == true
-    //   ensures opts.tls_ctx.app_path == path
-    //   ensures opts.tls_ctx.CA_locations_set == true
-    //   ensures 0 <= opts.tls_ctx.num_certs < opts.tls_ctx.cert_store.Length - 1
-    //   ensures opts.tls_ctx.num_certs == 0;
-
     method socket_cb(sock : Socket?) 
       returns (ret : int)
       requires sock != null
-      requires sock.tls_opts != null
       requires sock.app_path != ""
+      requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
       modifies sock
       modifies sock.tls_opts
       modifies sock.tls_opts.tls_ctx
       ensures ret == 1
-      ensures sock.tls_opts != null;
+      ensures sock != null
+      ensures sock.tls_opts != null
+      ensures sock.tls_opts.tls_ctx != null
     {
       var opts := tls_opts_create(sock.app_path);
       assert(opts.tls_ctx != null);
       assert(opts.tls_ctx.num_certs == 0);
   
       sock.tls_opts := opts;
-
-      // sock.optsSeq.opts_list := sock.optsSeq.opts_list + [opts]; // fixme - differs from ssa
       ret := 1;
     }
 
     method connect_cb(sock : Socket?) 
       returns (ret : int)
-      // modifies sock.optsSeq.opts_list[0]
+      modifies sock
       modifies sock.tls_opts
-      modifies sock.tls_opts.tls_ctx
       requires sock != null
+      modifies sock.tls_opts.tls_ctx
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
-      // requires |sock.optsSeq.opts_list| >= 1
-      requires sock.tls_opts.tls_ctx != null
+      ensures sock != null
+      ensures sock.tls_opts != null
+      ensures sock.tls_opts.tls_ctx != null
       ensures ret == 1
     {
-      ret := tls_opts_client_setup(sock.tls_opts); // fixme - differs from ssa
+      ret := tls_opts_client_setup(sock.tls_opts);
       // call tls_client_wrapper_setup
     }
 }
