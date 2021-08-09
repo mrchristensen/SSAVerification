@@ -26,7 +26,7 @@ module verify {
     var x := socket_cb(sock);
     assert(x == 1);
 
-    var z := connect_cb(sock);
+    var z := connect_cb(sock); //call may violate context's modifies clause This error can be caused by a method writing in a location that is not included in it “modifies” clause. However if you get it in your main program, it is likely because a method initialized a field without ensuring that it was a fresh location.
     assert(z == 1);
 
     // assert sock.tls_opts != null;
@@ -34,7 +34,7 @@ module verify {
     // assert sock.tls_opts.tls_ctx.X509_cert != null;
     // assert 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length;
     // var y := set_certificate_chain(sock.tls_opts, conn_ctx, sock.app_path);
-    
+
     //assert the crap out of it
     // assert(y == 1);
     // assert(conn_ctx.tls == "");
