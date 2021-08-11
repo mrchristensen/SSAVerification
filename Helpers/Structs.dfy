@@ -17,6 +17,7 @@ module Structs
     constructor Init(kSize : int, pKey : string, rHostname : string)
       ensures fresh(alpnProtos)
       ensures fresh(cipherSuites)
+      ensures fresh(tls_opts)
       ensures privateKey == pKey
       ensures remHostname == rHostname
       ensures app_path == "path"
@@ -74,6 +75,7 @@ module Structs
     constructor Init()
       // modifies cert_store
       ensures fresh(cert_store)
+      ensures fresh(X509_cert)
       ensures references == 1
       ensures cipher_list_set == false
       ensures cert_store.Length == MAX_SIZE
@@ -87,6 +89,7 @@ module Structs
       //resources are freed when this is 0
       references := 1;
       cipher_list_set := false;
+      X509_cert := new X509.Init("cert");
     }
 
     method addX509(cert : X509)

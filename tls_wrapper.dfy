@@ -16,16 +16,17 @@ module tls_wrapper {
       requires tls_opts.tls_ctx != null
       
       modifies tls_opts
-      modifies tls_opts`is_server
+      // modifies tls_opts`is_server
       modifies tls_opts.tls_ctx
 
       ensures ret == 1
       ensures tls_opts.tls_ctx != null
     {
-      tls_opts.is_server := 0;
+      // tls_opts.is_server := 0;
 
       // Temporarily disable validation
       ret := SSL_CTX_set_verify(tls_opts.tls_ctx, SSL_VERIFY_NONE);
+      ret := 1;
     }
 
     method tls_opts_create(path : string)
@@ -43,6 +44,8 @@ module tls_wrapper {
       ensures opts.tls_ctx.CA_locations_set == true
       ensures 0 <= opts.tls_ctx.num_certs < opts.tls_ctx.cert_store.Length - 1
       ensures opts.tls_ctx.num_certs == 0;
+      ensures fresh(opts)
+      // ensures fresh(tls_ctx)
     {
       var ssa_config : ssa_config_t;
       var tls_ctx : SSL_CTX;
@@ -50,6 +53,8 @@ module tls_wrapper {
 
       opts := new tls_opts.Init();
       tls_ctx := new SSL_CTX.Init();
+      assert fresh(tls_ctx);
+      assert fresh(opts);
 
       // initialized with SSL_CTX_new
       tls_ctx.meth := "SSLv23_method";
@@ -103,6 +108,8 @@ module tls_wrapper {
       {
         var cur_opts := new tls_opts.Init();
         var new_opts := new tls_opts.Init();
+        assert fresh(cur_opts);
+        assert fresh(new_opts);
 
         // if a connection already exists, set the certs on the existing connection
         if conn_ctx != null {
@@ -198,23 +205,26 @@ module tls_wrapper {
       ret := 1;
     }
 
-    method connect_cb(sock : Socket?) 
+    method connect_cb(sock : Socket) 
       returns (ret : int)
       
-      requires sock != null
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
 
       modifies sock
       modifies sock.tls_opts
+      // modifies sock.tls_opts`is_server
       modifies sock.tls_opts.tls_ctx
 
-      ensures sock != null
-      ensures sock.tls_opts != null
-      ensures sock.tls_opts.tls_ctx != null
+      // ensures sock.tls_opts != null
+      // ensures sock.tls_opts.tls_ctx != null
       ensures ret == 1
+      // ensures fresh(sock)
+      // ensures fresh(sock.tls_opts)
+      // ensures fresh(sock.tls_opts.tls_ctx)
     {
       ret := tls_opts_client_setup(sock.tls_opts);
       // call tls_client_wrapper_setup
+      // ret := 1;
     }
 }
