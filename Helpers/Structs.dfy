@@ -81,6 +81,7 @@ module Structs
       ensures cert_store.Length == MAX_SIZE
       ensures num_certs == 0
       ensures meth == ""
+      ensures X509_cert != null
     {
       cert_store := new X509?[MAX_SIZE];
       num_certs := 0;

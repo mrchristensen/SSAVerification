@@ -14,7 +14,7 @@ module tls_wrapper {
 
       requires tls_opts != null
       requires tls_opts.tls_ctx != null
-      
+
       modifies tls_opts
       // modifies tls_opts`is_server
       modifies tls_opts.tls_ctx
@@ -26,7 +26,7 @@ module tls_wrapper {
 
       // Temporarily disable validation
       ret := SSL_CTX_set_verify(tls_opts.tls_ctx, SSL_VERIFY_NONE);
-      ret := 1;
+      // ret := 1;
     }
 
     method tls_opts_create(path : string)
@@ -37,7 +37,6 @@ module tls_wrapper {
       ensures opts.tls_ctx != null
       ensures opts.tls_ctx.meth == "SSLv23_method"
       ensures opts.tls_ctx.references == 1
-      ensures fresh(opts.tls_ctx.cert_store)
       ensures opts.tls_ctx.sid_ctx_length == 1
       ensures opts.tls_ctx.cipher_list_set == true
       ensures opts.tls_ctx.app_path == path
@@ -45,6 +44,8 @@ module tls_wrapper {
       ensures 0 <= opts.tls_ctx.num_certs < opts.tls_ctx.cert_store.Length - 1
       ensures opts.tls_ctx.num_certs == 0;
       ensures fresh(opts)
+      ensures fresh(opts.tls_ctx)
+      ensures fresh(opts.tls_ctx.cert_store)
       // ensures fresh(tls_ctx)
     {
       var ssa_config : ssa_config_t;
@@ -52,9 +53,10 @@ module tls_wrapper {
       var store_file : string; // trust store
 
       opts := new tls_opts.Init();
+      assert fresh(opts);
+
       tls_ctx := new SSL_CTX.Init();
       assert fresh(tls_ctx);
-      assert fresh(opts);
 
       // initialized with SSL_CTX_new
       tls_ctx.meth := "SSLv23_method";
@@ -134,6 +136,10 @@ module tls_wrapper {
 
         // There is no cert set yet on the first SSL_CTX so we'll use that
         var get_cert : X509?;
+
+        assert tls_opts.tls_ctx != null;
+        assert tls_opts.tls_ctx.X509_cert != null;
+
         get_cert := SSL_CTX_get0_certificate(tls_opts.tls_ctx); //Matt todo
 
         if (get_cert == null) { // called from OpenSSLHelpers
@@ -185,36 +191,88 @@ module tls_wrapper {
       return ret;
     }
 
-    method socket_cb(sock : Socket?) 
+    method socket_cb(sock : Socket?)
       returns (ret : int)
+
       requires sock != null
       requires sock.app_path != ""
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
+
       modifies sock
+
       ensures ret == 1
       ensures sock != null
       ensures sock.tls_opts != null
       ensures sock.tls_opts.tls_ctx != null
+
+      ensures fresh(sock.tls_opts)
+      // ensures fresh(sock)
     {
       var opts := tls_opts_create(sock.app_path);
       assert(opts.tls_ctx != null);
       assert(opts.tls_ctx.num_certs == 0);
-  
+
       sock.tls_opts := opts;
+
+      // sock.tls_opts.is_server := 0;
+      // sock.tls_opts.tls_ctx.verify_mode := SSL_VERIFY_NONE;
+      // sock.tls_opts.tls_ctx.set_verify := true;
+
+      // assert(sock.tls_opts.is_server == 0);
+      // assert(sock.tls_opts.tls_ctx.verify_mode == SSL_VERIFY_NONE);
+      // assert(sock.tls_opts.tls_ctx.set_verify == true);
+
       ret := 1;
     }
 
-    method connect_cb(sock : Socket) 
+    method connect_cb(sock : Socket?)
       returns (ret : int)
-      
+
+      requires sock != null
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
 
-      modifies sock
-      modifies sock.tls_opts
+      // modifies sock
+      // modifies sock.tls_opts
+      // modifies sock.tls_opts.tls_ctx
       // modifies sock.tls_opts`is_server
+      // modifies sock.cipherSuites
+      // modifies sock.alpnProtos
+      // modifies sock`privateKey
+      // modifies sock`publicKey
+      // modifies sock`remHostname
+      // modifies sock.alpnProtos
+      // modifies sock.cipherSuites
+      // modifies sock.tls_opts
+      // modifies sock`app_path
+
+      // modifies sock.tls_opts.tls_ctx
+      // modifies sock.tls_opts`app_path
+      // modifies sock.tls_opts`is_server
+
+      // modifies sock.tls_opts.tls_ctx.cert_store
+      // modifies sock.tls_opts.tls_ctx`num_certs
+      // modifies sock.tls_opts.tls_ctx`references
+      // modifies sock.tls_opts.tls_ctx`meth
+
+      // modifies sock.tls_opts.tls_ctx.X509_cert
+      // // modifies sock.tls_opts.tls_ctx.X509_cert`cert
+
+      // modifies sock.tls_opts.tls_ctx`sid_ctx_length
+      // modifies sock.tls_opts.tls_ctx`sid_ctx
+      // modifies sock.tls_opts.tls_ctx`cipher_list_set
+      // modifies sock.tls_opts.tls_ctx`app_path
+      // modifies sock.tls_opts.tls_ctx`CA_locations_set
+      // modifies sock.tls_opts.tls_ctx`min_proto_set
+      // modifies sock.tls_opts.tls_ctx`max_proto_set
+      // modifies sock.tls_opts.tls_ctx`called_new_ctx
+      // modifies sock.tls_opts.tls_ctx`verify_mode
+      // modifies sock.tls_opts.tls_ctx`set_verify
+
+      modifies sock.tls_opts
       modifies sock.tls_opts.tls_ctx
+      modifies sock
 
       // ensures sock.tls_opts != null
       // ensures sock.tls_opts.tls_ctx != null
@@ -223,8 +281,17 @@ module tls_wrapper {
       // ensures fresh(sock.tls_opts)
       // ensures fresh(sock.tls_opts.tls_ctx)
     {
-      ret := tls_opts_client_setup(sock.tls_opts);
+      // ret := tls_opts_client_setup(sock.tls_opts);
       // call tls_client_wrapper_setup
-      // ret := 1;
+
+      sock.tls_opts.is_server := 0;
+      sock.tls_opts.tls_ctx.verify_mode := SSL_VERIFY_NONE;
+      sock.tls_opts.tls_ctx.set_verify := true;
+
+      assert(sock.tls_opts.is_server == 0);
+      assert(sock.tls_opts.tls_ctx.verify_mode == SSL_VERIFY_NONE);
+      assert(sock.tls_opts.tls_ctx.set_verify == true);
+
+      ret := 1;
     }
 }
