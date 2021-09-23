@@ -1,11 +1,9 @@
 include "Structs.dfy"
 include "Constants.dfy"
-include "HelperFunctions.dfy"
 
 module OpenSSLHelpers {
   import opened Structs
   import opened Constants
-  import opened HelperFunctions
 
   // return X509 object that corresponds to the ssl_ctx obj given
   method SSL_CTX_get0_certificate(ctx : SSL_CTX?)
