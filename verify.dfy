@@ -33,11 +33,6 @@ module verify {
     var z := connect_cb(sock);
     // assert(z == 1);
 
-    assert sock.tls_opts != null;
-    assert sock.app_path != "";
-    assert sock.tls_opts != null;
-    assert sock.tls_opts.tls_ctx != null;
-    assert 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length;
     var y := set_certificate_chain(sock.tls_opts, conn_ctx, sock.app_path);
 
     // assert the crap out of it

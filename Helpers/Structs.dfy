@@ -98,12 +98,13 @@ module Structs
       modifies `num_certs //Back tick for primatives - FrameFields
       modifies cert_store
       requires 0 <= num_certs < cert_store.Length
-      ensures num_certs == old(num_certs) + 1
-      // ensures num_certs < cert_store.Length
-      ensures forall i : int :: 0 <= i < old(num_certs) ==> cert_store[i] == old(cert_store[i]) //Todo look into triggers
-      ensures if num_certs < cert_store.Length then cert_store[old(num_certs)] == cert else cert_store == old(cert_store)
+      // ensures num_certs == old(num_certs) + 1
+      ensures 0 <= num_certs < cert_store.Length
+      // ensures forall i : int :: 0 <= i < old(num_certs) ==> cert_store[i] == old(cert_store[i]) //Todo look into triggers
+      // ensures if num_certs < cert_store.Length then cert_store[old(num_certs)] == cert else cert_store == old(cert_store)
     {
-      if(num_certs >= cert_store.Length) {
+      assert 0 <= num_certs < cert_store.Length;
+      if(num_certs >= cert_store.Length - 1) {
         return;
       }
       cert_store[num_certs] := cert;
@@ -146,6 +147,9 @@ module Structs
     constructor Init()
       ensures tls_ctx != null
       ensures fresh(tls_ctx)
+      ensures fresh(tls_ctx.X509_cert)
+      ensures tls_ctx.X509_cert != null
+      ensures tls_ctx.num_certs == 0
     {
       tls_ctx := new SSL_CTX.Init();
       app_path := ""; // todo does this need to be meaningful?

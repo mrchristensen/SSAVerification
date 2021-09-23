@@ -41,8 +41,11 @@ module tls_wrapper {
       ensures opts.tls_ctx.cipher_list_set == true
       ensures opts.tls_ctx.app_path == path
       ensures opts.tls_ctx.CA_locations_set == true
+      ensures opts.tls_ctx.X509_cert != null
       ensures 0 <= opts.tls_ctx.num_certs < opts.tls_ctx.cert_store.Length - 1
-      ensures opts.tls_ctx.num_certs == 0;
+      ensures opts.tls_ctx.num_certs == 0; //todo: also add top cap (and less than len of cert list?)
+
+      // ensures opts.tls_ctx == 0;
       ensures fresh(opts)
       ensures fresh(opts.tls_ctx)
       ensures fresh(opts.tls_ctx.cert_store)
@@ -154,6 +157,7 @@ module tls_wrapper {
 
         new_opts := tls_opts_create(filepath);
         assert new_opts.tls_ctx != null;
+        assert new_opts.tls_ctx.X509_cert != null;
         assert filepath != "";
 
         var use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
@@ -205,6 +209,8 @@ module tls_wrapper {
       ensures sock != null
       ensures sock.tls_opts != null
       ensures sock.tls_opts.tls_ctx != null
+      ensures sock.tls_opts.tls_ctx.X509_cert != null
+      ensures 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length
 
       ensures sock == old(sock)
       ensures fresh(sock.tls_opts)
@@ -212,6 +218,8 @@ module tls_wrapper {
       ensures sock.app_path != ""
     {
       var opts := tls_opts_create(sock.app_path);
+      assert opts.tls_ctx.X509_cert != null;
+
       assert(opts.tls_ctx != null);
       assert(opts.tls_ctx.num_certs == 0);
 
@@ -234,6 +242,8 @@ module tls_wrapper {
       requires sock != null
       requires sock.tls_opts != null
       requires sock.tls_opts.tls_ctx != null
+      requires sock.tls_opts.tls_ctx.X509_cert != null
+      requires 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length
 
       // modifies sock
       // modifies sock.tls_opts
@@ -280,8 +290,12 @@ module tls_wrapper {
       // ensures sock.tls_opts.tls_ctx != null
       ensures ret == 1
 
+
       ensures sock.tls_opts == old(sock.tls_opts)
       ensures sock.tls_opts.tls_ctx == old(sock.tls_opts.tls_ctx)
+      ensures sock.tls_opts.tls_ctx.X509_cert == old(sock.tls_opts.tls_ctx.X509_cert)
+      ensures sock.tls_opts.tls_ctx.X509_cert != null
+      ensures 0 <= sock.tls_opts.tls_ctx.num_certs < sock.tls_opts.tls_ctx.cert_store.Length
       // ensures fresh(sock)
       // ensures fresh(sock.tls_opts)
       // ensures fresh(sock.tls_opts.tls_ctx)
