@@ -206,8 +206,10 @@ module tls_wrapper {
       ensures sock.tls_opts != null
       ensures sock.tls_opts.tls_ctx != null
 
+      ensures sock == old(sock)
       ensures fresh(sock.tls_opts)
-      // ensures fresh(sock)
+      ensures fresh(sock.tls_opts.tls_ctx)
+      ensures sock.app_path != ""
     {
       var opts := tls_opts_create(sock.app_path);
       assert(opts.tls_ctx != null);
@@ -270,13 +272,16 @@ module tls_wrapper {
       // modifies sock.tls_opts.tls_ctx`verify_mode
       // modifies sock.tls_opts.tls_ctx`set_verify
 
+      // modifies sock
       modifies sock.tls_opts
       modifies sock.tls_opts.tls_ctx
-      modifies sock
 
       // ensures sock.tls_opts != null
       // ensures sock.tls_opts.tls_ctx != null
       ensures ret == 1
+
+      ensures sock.tls_opts == old(sock.tls_opts)
+      ensures sock.tls_opts.tls_ctx == old(sock.tls_opts.tls_ctx)
       // ensures fresh(sock)
       // ensures fresh(sock.tls_opts)
       // ensures fresh(sock.tls_opts.tls_ctx)
