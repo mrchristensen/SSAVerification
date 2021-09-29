@@ -96,84 +96,91 @@ module tls_wrapper {
     }
 
     method set_certificate_chain(tls_opts : tls_opts?, conn_ctx : tls_conn_ctx?, filepath : string)
-        returns (ret : int)
-        requires tls_opts != null
-        requires filepath != ""
-        requires tls_opts.tls_ctx != null
-        requires tls_opts.tls_ctx.X509_cert != null
-        requires 0 <= tls_opts.tls_ctx.num_certs < tls_opts.tls_ctx.cert_store.Length
-        modifies conn_ctx
-        modifies tls_opts
-        modifies tls_opts.tls_ctx
-        // modifies tls_opts.tls_ctx`num_certs
-        modifies tls_opts.tls_ctx.cert_store
-        ensures ret != 0
-        ensures tls_opts != null
-        //TODO: require/ensure that the SSL_CTX_get0_certificate don't move such that num_certs > cert_store.Length - 1
-      {
-        var cur_opts := new tls_opts.Init();
-        var new_opts := new tls_opts.Init();
-        assert fresh(cur_opts);
-        assert fresh(new_opts);
+      returns (ret : int)
+      requires tls_opts != null
+      requires filepath != ""
+      requires tls_opts.tls_ctx != null
+      requires tls_opts.tls_ctx.X509_cert != null
+      requires 0 <= tls_opts.tls_ctx.num_certs < tls_opts.tls_ctx.cert_store.Length
+      requires conn_ctx != null
 
-        // if a connection already exists, set the certs on the existing connection
-        if conn_ctx != null {
-          var x := SSL_CTX_use_certificate_chain_file(filepath, tls_opts.tls_ctx);
-          assert x == 1;
-          // SSL_use_certificate_chain_file here loads
-          // contents of filepath into conn_ctx.tls
-          conn_ctx.setTLS(filepath);
-          assert conn_ctx.tls != "";
+      modifies tls_opts
+      modifies tls_opts.tls_ctx
+      modifies tls_opts.tls_ctx.cert_store
+      modifies tls_opts.tls_ctx`num_certs
+      modifies conn_ctx
 
-          return 1;
-        }
+      ensures ret != 0
+      ensures tls_opts != null
+      ensures tls_opts == old(tls_opts)
+      ensures tls_opts.tls_ctx == old(tls_opts.tls_ctx)
+      ensures tls_opts.tls_ctx.X509_cert == old(tls_opts.tls_ctx.X509_cert)
+      ensures tls_opts.tls_ctx.cert_store == old(tls_opts.tls_ctx.cert_store)
+      ensures conn_ctx == old(conn_ctx)
+      ensures filepath == old(filepath)
+      ensures conn_ctx.tls == filepath //todo: incorporate this into the secure predicate
+      //TODO: require/ensure that the SSL_CTX_get0_certificate don't move such that num_certs > cert_store.Length - 1
+    {
+      // var cur_opts := new tls_opts.Init();
+      // var new_opts := new tls_opts.Init();
+      // assert fresh(cur_opts);
+      // assert fresh(new_opts);
 
-        // if no connection exists, set the certs on the options
-        if tls_opts == null {
-          return 0;
-        }
+      // if a connection already exists, set the certs on the existing connection
+      if conn_ctx != null {
+        var x := SSL_CTX_use_certificate_chain_file(filepath, tls_opts.tls_ctx);
+        assert x == 1;
+        // SSL_use_certificate_chain_file here loads
+        // contents of filepath into conn_ctx.tls
+        conn_ctx.setTLS(filepath);
+        assert conn_ctx.tls != "";
 
-        assert tls_opts != null;
+        return 1;
+      }
 
-        // cur_opts := tls_opts;
+      // if no connection exists, set the certs on the options
+      if tls_opts == null {
+        return 0;
+      }
 
-        // There is no cert set yet on the first SSL_CTX so we'll use that
-        var get_cert : X509?;
+      assert tls_opts != null;
 
-        assert tls_opts.tls_ctx != null;
-        assert tls_opts.tls_ctx.X509_cert != null;
+      // cur_opts := tls_opts;
 
-        get_cert := SSL_CTX_get0_certificate(tls_opts.tls_ctx); //Matt todo
+      // There is no cert set yet on the first SSL_CTX so we'll use that
+      var get_cert : X509?;
 
-        if (get_cert == null) { // called from OpenSSLHelpers
-          var use_chain_file:int;
-          use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, tls_opts.tls_ctx); //Matt todo
-        	if (use_chain_file != 1) {
-            return 0; //Error: Unable to assign certificate chain
-        	}
+      get_cert := SSL_CTX_get0_certificate(tls_opts.tls_ctx); //Matt todo
 
-        	return 1; //Log: Using cert located at "filepath"
-        }
-
-        new_opts := tls_opts_create(filepath);
-        assert new_opts.tls_ctx != null;
-        assert new_opts.tls_ctx.X509_cert != null;
-        assert filepath != "";
-
-        var use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
-
+      if (get_cert == null) { // called from OpenSSLHelpers
+        var use_chain_file:int;
+        use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, tls_opts.tls_ctx); //Matt todo
         if (use_chain_file != 1) {
-        	ret := 0;
-          return ret; //Error: Unable to assign certificate chain
+          return 0; //Error: Unable to assign certificate chain
         }
-
-        // Add new opts to option list
-        // tls_opts_seq.opts_list := tls_opts_seq.opts_list + [new_opts];
-
-        // FIXME - what to do with new opts??
 
         return 1; //Log: Using cert located at "filepath"
       }
+
+      var new_opts := tls_opts_create(filepath);
+      assert new_opts.tls_ctx != null;
+      assert new_opts.tls_ctx.X509_cert != null;
+      assert filepath != "";
+
+      var use_chain_file := SSL_CTX_use_certificate_chain_file(filepath, new_opts.tls_ctx);
+
+      if (use_chain_file != 1) {
+        ret := 0;
+        return ret; //Error: Unable to assign certificate chain
+      }
+
+      // Add new opts to option list
+      // tls_opts_seq.opts_list := tls_opts_seq.opts_list + [new_opts];
+
+      // FIXME - what to do with new opts??
+
+      return 1; //Log: Using cert located at "filepath"
+    }
 
     // this is called in SSA in every TLS handshake and this callback
     // should be set in the accept() entry point
