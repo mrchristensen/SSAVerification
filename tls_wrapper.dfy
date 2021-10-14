@@ -116,6 +116,7 @@ module tls_wrapper {
       ensures tls_opts.tls_ctx == old(tls_opts.tls_ctx)
       ensures tls_opts.tls_ctx.X509_cert == old(tls_opts.tls_ctx.X509_cert)
       ensures tls_opts.tls_ctx.cert_store == old(tls_opts.tls_ctx.cert_store)
+      // ensures fresh(tls_opts.tls_ctx.cert_store)
       ensures conn_ctx == old(conn_ctx)
       ensures filepath == old(filepath)
       ensures conn_ctx.tls == filepath //todo: incorporate this into the secure predicate
@@ -309,6 +310,8 @@ module tls_wrapper {
     {
       // ret := tls_opts_client_setup(sock.tls_opts);
       // call tls_client_wrapper_setup
+
+      //todo: unflatted this function again (once everything is working)
 
       sock.tls_opts.is_server := 0;
       sock.tls_opts.tls_ctx.verify_mode := SSL_VERIFY_NONE;

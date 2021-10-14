@@ -100,6 +100,14 @@ module Structs
       requires 0 <= num_certs < cert_store.Length
       // ensures num_certs == old(num_certs) + 1
       ensures 0 <= num_certs < cert_store.Length
+      // ensures if old(num_certs) > cert_store.Length - 1 then fresh(cert_store[old(num_certs)]) else cert_store == old(cert_store)
+      ensures if old(num_certs) >= cert_store.Length - 1 then
+             num_certs == old(num_certs)
+          && cert_store == old(cert_store)
+        else
+          num_certs == old(num_certs) + 1
+          && cert_store[old(num_certs)] == cert
+          && forall i : int :: 0 <= i < old(num_certs) ==> old(cert_store[i]) == cert_store[i]
       // ensures forall i : int :: 0 <= i < old(num_certs) ==> cert_store[i] == old(cert_store[i]) //Todo look into triggers
       // ensures if num_certs < cert_store.Length then cert_store[old(num_certs)] == cert else cert_store == old(cert_store)
     {
