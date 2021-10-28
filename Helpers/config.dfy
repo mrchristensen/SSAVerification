@@ -8,9 +8,6 @@ module Config {
   // have set up the global_config with str_hashmap_create(20)
   method get_app_config(app_path : string)
     returns (config : ssa_config_t)
-    requires app_path != ""
-    ensures config.trust_store != ""
-    ensures config.trust_store == app_path
   {
     // for now we are using an empty config
     config := new ssa_config_t.Init();

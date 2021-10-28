@@ -18,11 +18,6 @@ module Structs
       ensures fresh(alpnProtos)
       ensures fresh(cipherSuites)
       ensures fresh(tls_opts)
-      ensures privateKey == pKey
-      ensures remHostname == rHostname
-      ensures app_path == "path"
-      ensures tls_opts != null
-      ensures tls_opts.tls_ctx != null
     {
       privateKey := pKey;
       remHostname := rHostname;
@@ -74,14 +69,8 @@ module Structs
 
     constructor Init()
       // modifies cert_store
-      ensures fresh(cert_store)
-      ensures fresh(X509_cert)
-      ensures references == 1
-      ensures cipher_list_set == false
-      ensures cert_store.Length == MAX_SIZE
-      ensures num_certs == 0
-      ensures meth == ""
-      ensures X509_cert != null
+      // ensures fresh(cert_store)
+      // ensures fresh(X509_cert)
     {
       cert_store := new X509?[MAX_SIZE];
       num_certs := 0;
@@ -97,19 +86,6 @@ module Structs
     //Todo Look into modifies a`[j] (pg 37)
       modifies `num_certs //Back tick for primatives - FrameFields
       modifies cert_store
-      requires 0 <= num_certs < cert_store.Length
-      // ensures num_certs == old(num_certs) + 1
-      ensures 0 <= num_certs < cert_store.Length
-      // ensures if old(num_certs) > cert_store.Length - 1 then fresh(cert_store[old(num_certs)]) else cert_store == old(cert_store)
-      ensures if old(num_certs) >= cert_store.Length - 1 then
-             num_certs == old(num_certs)
-          && cert_store == old(cert_store)
-        else
-          num_certs == old(num_certs) + 1
-          && cert_store[old(num_certs)] == cert
-          && forall i : int :: 0 <= i < old(num_certs) ==> old(cert_store[i]) == cert_store[i]
-      // ensures forall i : int :: 0 <= i < old(num_certs) ==> cert_store[i] == old(cert_store[i]) //Todo look into triggers
-      // ensures if num_certs < cert_store.Length then cert_store[old(num_certs)] == cert else cert_store == old(cert_store)
     {
       assert 0 <= num_certs < cert_store.Length;
       if(num_certs >= cert_store.Length - 1) {
@@ -138,8 +114,6 @@ module Structs
 
     constructor Init(file : string)
       requires file != ""
-      ensures cert == file //Todo make this meaningful
-      ensures cert != ""
     {
       cert := file;
     }
@@ -153,11 +127,8 @@ module Structs
     // char alpn_string[ALPN_STRING_MAXLEN]
 
     constructor Init()
-      ensures tls_ctx != null
-      ensures fresh(tls_ctx)
-      ensures fresh(tls_ctx.X509_cert)
-      ensures tls_ctx.X509_cert != null
-      ensures tls_ctx.num_certs == 0
+      // ensures fresh(tls_ctx)
+      // ensures fresh(tls_ctx.X509_cert)
     {
       tls_ctx := new SSL_CTX.Init();
       app_path := ""; // todo does this need to be meaningful?
@@ -200,14 +171,12 @@ module Structs
     var tls : string; // filepath to cert chain file
 
     constructor Init()
-      ensures tls == ""
     {
       tls := "";
     }
 
     method setTLS(tls : string)
       modifies this
-      ensures this.tls == tls;
     {
       this.tls := tls;
     }

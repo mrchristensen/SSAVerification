@@ -41,19 +41,14 @@ module OpenSSLHelpers {
   // loads a certificate chain from B<file> into B<ctx>.
   method SSL_CTX_use_certificate_chain_file(file : string, ctx : SSL_CTX?)
     returns (ret : int)
+
     modifies ctx.cert_store
     modifies ctx`num_certs
-    requires file != ""
-    requires ctx != null
-    requires 0 <= ctx.num_certs < ctx.cert_store.Length
+
     ensures if old(ctx.num_certs) >= ctx.cert_store.Length - 1 then
         true
       else
         fresh(ctx.cert_store[old(ctx.num_certs)])
-
-    // ensures ctx.num_certs == old(ctx.num_certs) + 1
-    ensures if old(ctx.num_certs) > ctx.cert_store.Length - 1 then fresh(ctx.cert_store[old(ctx.num_certs)]) else ctx.cert_store == old(ctx.cert_store)
-    ensures ret == 1
   {
     // in C code, it parses object from file but we'll just make an empty one for now
     var x509 := new X509.Init(file);
@@ -65,7 +60,6 @@ module OpenSSLHelpers {
   // just verify that this has been called
   method X509_verify_cert()
     returns (ret : bool)
-    ensures ret == true
   {
     ret := true;
     return ret;
@@ -75,14 +69,10 @@ module OpenSSLHelpers {
   // made the assumption to remove the callback fucntion
   method SSL_CTX_set_verify(ctx : SSL_CTX?, mode : int)
     returns (ret : int)
-    requires ctx != null
-    requires mode != -1
-    ensures ret == 1
-    // ensures ctx.verify_mode == mode
-    // ensures ctx.set_verify == true
+
     modifies ctx
     modifies ctx`verify_mode
-    // modifies ctx`set_verify
+
   {
     ctx.verify_mode := mode;
     ctx.set_verify := true;
