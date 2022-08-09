@@ -1,0 +1,77 @@
+Cool, awesome. Yeah. So I'm at Christianson gonna be talking about the form of verification of correct, TLS usage in the secure soccer API, which I know is a title that makes everybody just jump for joy and get so excited. So, I wanted to kind of break this down real fast, kind of two parts, the formal verification.
+
+And then what is secure soccer API? So, formal verification is the idea that we want to mathematically prove certain properties about a program and kind of the counterpart that would be like testing. So right now the industry realize heavily on like the testing of programs especially in like software development in order to reason and assurance stuffs that have a piece of software is ready for production ready for really use in the world and I think dyke stress signed up very clearly.
+
+And succinctly like the problem, the problematic nature of relying heavily on testing, that program testing can be, used to show the presence of bugs. I can never be used to show their apps, right? So I've heard companies both to me, like, oh, like our test. We has, you know, 2000, 3,000 test cases, which to me.
+
+Like it's like red flag. Like, oh, like I don't know. There's certain qualities about software that are hard to test such as like things like concurrency, so trying to find problems like data race. Where even if we run it over many test cases, we're not very, we're not, we can never be sure that such a issue, such an error doesn't exist.
+
+So I like to compare it to another discipline. In this case, civil engineering along every stage of the process. They have a way to mathematically. Verify what that what they're doing is sound and correct. So in the blueprint stage for bridge, for example, they can they can measure the weight on the supports and measure the torques and realize like oh these supports are sufficient even under such weather conditions in the weight, loads of the cars that are gonna be driving next.
+
+They do like on-site testing to make sure that the soils have the qualities that they're looking for to to build the foundation. And then even among the construction process, they're validating each part of the construction of the bridge until you get to the bridge, which hopefully won't fall on it.
+
+The first time that you know, three semis drive it on it on a night when it's raining in his icing, right? And so the idea is maybe we can push software. The the discipline of software engineering more towards the verification processes of other disciplines and engineering such as civil.
+
+We've kind of just come to accept that maybe like, programs will have memory leaks and that will hit blue screens or programs of crash. But we're kind of dreaming in a future where this doesn't happen where we can verify that our programs run soundly and completely before even having the user test.
+
+The second part of the title that I wanted to explain real fast, was the secure socket API. So the seizure socket API is a program that the internet research have made doctors apollos lab. And the idea is that using TLS to create a secure connection is really difficult. There's more than 500 symbols developers use only about 20 to 40 and they estimate it that the minimum number of lines of code to create just like a basic.
+
+Hello world connection to a server program, was 317 and oftentimes developers, especially in suffering, engineering again, maybe not so much and larger companies. But in smaller companies developers aren't super familiar with the library, like, live SSL or different ways of creating security, TLS connections. And so, the idea is, let's abstract that responsibility away from like the application developer.
+
+And have someone know, who knows what they're doing? Set up a library that sets up the connection in a secure way. Such that the developer only needs to put as their protocol argument when creating a socket IP prototails. And then in the back end, everything will be done for them and create a security connection.
+
+So this is what secure socket API is this this idea that you specify IP protots, which only exists when you have the API installed on your computer and then the Damen will run in the background set everything up for you and either return a socket that is secure the connected or say sorry like there's certain things about this connection that don't let us set up a secure connection.
+
+So again, abstracting the responsibility away from the kitchen developer. So the problem then we run into is, how do we know that secure socket API? Actually produces a safe and secure socket every single time we use it. And this is the problem that our lab was trying to solve.
+
+So how do we formally verify that? It does what it says it done. So this is, this is formal methods is form of verification. So I'm going to first outline the process that we took to formally verify the SSA site. When I say SSA security API, how we use to verify SSA and then we'll kind of jump into a concrete example.
+
+So the process we took, we split into four steps First. We wanted to reason about the properties of what actually makes up a secure connection. So right out, what are the things that we want to happen such as we refill confidence saying like oh yes this is a connection secure So this could be the doing things like verifying certificate chain or doing certificate.
+
+Revocation things like this After, we kind of got the properties that we felt like to find a secure connection. We wanted reason about contracts and I'll talk a little bit more about this on the next slide, but kind of this idea of what do we require code wise? Like, okay, so we want certificate, revocation like what actually needs to happen in code such that we can feel like, oh yes, we've definitely checked the box for certificate.
+
+Revocation. Next, we need to model SSA in a verification framework. So we chose to use Daphne, which is a verification language coming out of Microsoft research. I'm in the idea as we kind of like model the code. So model the functionality, the code in a language that also has support for contracts so we're going to be able to overlay our contracts onto our model and show that our model accurately satisfies the contracts.
+
+And then finally we have to show that our model accurately represents the codebase that we're trying to model. So we need to show that the code base that we have in Daphne accurately reflects the functionality of the actual base for secure soccer API SSA. So contracts for me were probably the hardest thing to understand coming into this.
+
+And it kind of rests on this idea of week is preconditioning calculus. And the problem that we is pre-conditioning, calculus tries to solve is how do we prove quality F, right? So how do we prove certificate revocations happening? So, let's say, by the way, I like to think about it is a lot of puzzle pieces and each puzzle piece represents a function and we know that when function five is called we can ensure quality F.
+
+So when function five is called, we like yes, we've done certification. Check And each funk like function one calls function two, which comes function three which counts function four can like a list here. So basically what we do is we can find like the minimum requirements to get function A function one running so requires a so this could be like, oh, you know, we give it a valid IP address to server that's waiting at connection and the certificate we passed to it is valid, right?
+
+And such. So we ensure that we are now connected to the server, for example, and then the idea is the requirements for the next function are the property that we ensured in the first function. So it's kind of like a nested process where what we ensure with function one is what we require for function to and so on and so on until we're able to prove f as long as we are given a if that makes sense.
+
+Now, for more concrete example. So here's the list of properties that we define that create a secure state within SSA, and we're going to be looking at the verify certificate chain. So, just a real quick summary, for those who haven't worked with certificates, before the idea was certificates, is basically says the website that I'm on or the server that I'm connecting to is who they say they are and it's almost like a linked list.
+
+So here's our end and to see certificates, that's what we get when we go to like BYU and then acts almost as so, we have like, who they are. They're public keys, we can verify their signature and then we have another certificate on which leads to an intermediary certificates, it's like a linked list and then there can be multiple intermediate certificates and then until we hit the root certificate.
+
+And so, the idea here is that we want to traverse this linked list and verify each certificate along the way. So, in order to do this using open SSL the library to implement TLS. We need all of these functions. We're specifically only going to look at the user, certificate chain file and add X509X problem.
+
+And be the type of certificate that we're working with. So here is our Daphne model. So we see here are already our contracts. So these are the requires and ensures kind of throwing back to the weakest preconditioning calculus. So we require that the file is not normal. That the file is not an empty string and at the context is not.
+
+No. And then given that, these two things are true. We can promise that the number of certs by the end of this function will not be the same as when we begin. And then here we have the body. So this is the actual model of the code, the actual functionality of the code.
+
+This is just reasoning about the function. And here, we're going to make our call to X, add X, 509. And then here we start, by saying we start by discreetly saying the state that we're going to modify within this function so that Daphne can reason about that. Next we have our contracts so we require a couple of things we require that our number of certs is less, than is less than the number.
+
+We can hold minus 1. So we have space to add another one. And given these two things that the certain is not knowing we have space for it, we can ensure that the number of certs will grow by one because we're adding one, we can ensure that we're still within the, our size, limitation for this certain store.
+
+And then, we ensure that we don't modify any of the other shirts. We've just added one. And then again, there's our body of the method which actually reflects what SSA is should be doing in the background. So a couple concluding thoughts about what we've learned and what's next for future research.
+
+So so far what we've seen of the SSA the secure socket API as far as we've validated it, and as far as it's implemented we found that it's, it's implemented correctly. So basically the formal verification that we've been able to conclude has shown that it's been implemented in a correct way.
+
+On the other thing that we found out is formal verifications really hard on anything meaningful, which isn't really new, it's just hard because solutions aren't very scalable and the formal verification that we've done on. SSA doesn't really append any other code base. So we lacked kind of robust tools.
+
+So what is next? We lack that last final step. If you remember a process of actually guarantee showing that our model and Daphne represents the actual code base that we're trying to verify. So to do that, we would need to integrate like a mechanical proof into the actual code base of SSA, which hopefully will happen by the next year.
+
+SRC. And then also, there can be more research into more generalized tools for formoverification. Because as it stands, nobody in the industry. Really people actively pursuing it, but formal verification isn't very actively used in industry. Just because the amount of time to build such to build such verification and a landscape, that's very changing in dynamic.
+
+Is it like the proofs are very brittle? So, yeah, that is my presentation and I guess we probably have some time for questions. Thank you working on from there. Yeah. So as formal verification and achieved with anything meaningful, or is it just okay? Yeah, so that's a really good question.
+
+Amazon is probably like the leading industry, like big industry partner that's pursuing it. They've done a lot of form overification over like they're AWS infrastructure which is super interesting and we've had a couple of BYU grads that have come out of the lab that have been pretty instrumental in that.
+
+So yes with an aspect I guess I don't think there's anything that's like very like completely holistically but like little parts of things that are important. That makes sense. Yeah cool. Some questions so I corrected this is your formerly. Verifying the particular complementation of this SSA. Is this always apply to implementation or do you work to use these techniques to, to verify, you know, the astronaut protocol or agreeable designer systems?
+
+Sure? So like the way we did, it was like, specifically. So, the way I like to think about it is like, you're trying to prove certain qualities over like a domain. So, like you could prove certain qualities over like at the protocol. For example, if you wanted to, well, we've done doesn't really transfer to anything else because you'd have to like model that code and then create new contracts on top of it.
+
+If that makes sense. I'm not sure if I fully understood your question but he tells you we have. There's a tail is protocol. It's because of my main one in the document, he went and then there a bunch of implementations. Yeah, you're focused on proving specific implementations. Not the not, the actual protocol stuff.
+
+Yeah. Yeah. You definitely could definitely would be a very intensive process, but yeah, cool. Well thank you, man. Thank you.
